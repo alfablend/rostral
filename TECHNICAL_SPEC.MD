@@ -571,7 +571,7 @@ Usage:
 
 ```bash
 rostral validate monitor.yaml
-`
+```
 ---
 
 ### Default Configuration
