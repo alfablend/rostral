@@ -109,6 +109,7 @@ alerts:
     notify: 
       - telegram://your-bot-token@your-channel
       - email://you@example.com
+```
 
 ### Fields
 
@@ -462,6 +463,7 @@ Example:
 
 🔗 {{ event.url }}
 📎 Tags: {{ tags | join(', ') }}
+```
 
 ### Extensibility via Plugin API
 
