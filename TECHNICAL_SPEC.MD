@@ -244,6 +244,7 @@ users (
   role TEXT CHECK(role IN ('admin', 'editor', 'viewer')),
   created_at TIMESTAMP DEFAULT now()
 )
+```
 
 - Passwords hashed using bcrypt or argon2  
 - Optional fields: lastlogin, disabled, orgid
