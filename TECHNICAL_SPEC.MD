@@ -39,6 +39,7 @@ normalize:
   trim: true
 gpt:
   prompt: "Summarize key changes..."
+'''
 
 ## 4. 🗂️ Event Storage
 
