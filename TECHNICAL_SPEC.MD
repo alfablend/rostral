@@ -635,7 +635,7 @@ cd rostral
 cp .env.example .env
 docker-compose up --build
 
-`
+```
 
 - Local SQLite database by default  
 - Admin and demo users seeded automatically  
@@ -859,7 +859,7 @@ This section outlines the high-priority development actions for finalizing the R
 - Add `README.md`, `branding.md`, and SVG logo  
 - Create Open Graph preview (`social.png`)  
 - Configure GitHub Pages or Netlify preview  
-- Buy domain `rostral.io` or configure DNS  
+- Buy domain or configure DNS  
 
 ---
 
