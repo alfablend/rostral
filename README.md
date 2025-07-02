@@ -1,7 +1,7 @@
 # Rostral
 
 <p align="center">
-  <img src="assets/logo-readme.jpeg" width="250" alt="Rostral Logo">
+  <img src="assets/readme-logo.jpeg" width="250" alt="Rostral Logo">
 </p>
 
 All you need in one feed — AI-powered monitoring for anything
