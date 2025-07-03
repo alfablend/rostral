@@ -20,7 +20,7 @@ def get_html(url):
     r.raise_for_status()
     with open("debug_output.html", "w", encoding="utf-8") as f:
         f.write(r.text)
-return r.text
+    return r.text
 
 # Apply CSS selectors from the extract block to parse HTML
 def extract_fields(html, extract_conf):
