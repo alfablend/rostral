@@ -25,31 +25,14 @@ fetch:
     User-Agent: rostral-bot/1.0
 
 extract:
-  html:
-    # HTML extraction occurs regardless of PDF presence
-    # Used for fallback if PDF not available
-    content_selector: article
-    fields:
-      title:
-        selector: h1, h2
-        attr: text
-      published_at:
-        selector: time
-        attr: datetime
-      document_link:
-        # Attempt to find PDF link in the article
-        selector: a[href$=".pdf"]
-        attr: href
-      raw_text:
-        # Used for fallback input if no PDF present
-        selector: article, div.content
-        attr: text
-  pdf:
-    # PDF is optional — only processed if document_link is found
-    # If document_link is empty or download fails, this stage is skipped silently
-    source: "{{ document_link }}"
-    max_pages: 3
-    language_hint: auto
+  raw_text: "section.main-content"  
+  title: h1
+  date: time::attr(datetime)
+
+  # Although WHO used to provide PDF versions of disease alerts,
+  # as of 2025, most Disease Outbreak News pages are HTML-only.
+  # This field remains optional in case future reports reintroduce PDF attachments.
+  pdf: a[href$=".pdf"]::attr(href)
 
 normalize:
   # This stage receives data from extract.html and/or extract.pdf
