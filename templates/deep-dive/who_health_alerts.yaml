@@ -1,0 +1,103 @@
+b# File: templates/deep-dive/who_health_alerts.yaml
+# Purpose: Monitor and summarize global health alerts from WHO — with fallback between PDF and HTML
+# Status: spec-draft — used to inform architecture and GPT summarization logic
+
+version: 1.0
+
+meta:
+  title: WHO Global Health Alerts
+  description: |
+    Monitor health emergency alerts and outbreak bulletins from the World Health Organization (WHO).
+    If a PDF is available, it will be downloaded and summarized. If not, HTML page content is used instead.
+  tags: [who, health, outbreaks, pdf, ai, multilingual]
+  lang: en
+  category: global_health
+  status: spec-draft
+
+source:
+  type: rss
+  url: https://www.who.int/feeds/entity/emergencies/en/rss.xml
+
+fetch:
+  schedule: "0 */6 * * *"   # Fetch every 6 hours
+  ttl: 24h
+  headers:
+    User-Agent: rostral-bot/1.0
+
+extract:
+  html:
+    # HTML extraction occurs regardless of PDF presence
+    # Used for fallback if PDF not available
+    content_selector: article
+    fields:
+      title:
+        selector: h1, h2
+        attr: text
+      published_at:
+        selector: time
+        attr: datetime
+      document_link:
+        # Attempt to find PDF link in the article
+        selector: a[href$=".pdf"]
+        attr: href
+      raw_text:
+        # Used for fallback input if no PDF present
+        selector: article, div.content
+        attr: text
+  pdf:
+    # PDF is optional — only processed if document_link is found
+    # If document_link is empty or download fails, this stage is skipped silently
+    source: "{{ document_link }}"
+    max_pages: 3
+    language_hint: auto
+
+normalize:
+  # This stage receives data from extract.html and/or extract.pdf
+  # Fields will be populated from whichever input is available
+  trim: true
+  fields:
+    country: extract_by_pattern("Country:\\s+([A-Z][a-zA-Z\\s]+)")
+    event_type: extract_by_keywords(["cholera", "dengue", "ebola", "covid"])
+    affected: extract_by_regex("(?i)(\\d{2,6}) (cases|deaths|confirmed)")
+    region: extract_by_pattern("Region:\\s+([\\w\\s]+)")
+    keywords: detect_keywords()
+    document: "{{ document_link }}"
+
+gpt:
+  # Summary input is determined automatically:
+  # - If PDF was extracted → use its text
+  # - Else → fallback to HTML text (raw_text)
+  # This fallback behavior is built into the engine and requires no extra config
+  model: gpt-4
+  temperature: 0.3
+  prompt: |
+    You are processing a health alert from WHO.
+    Summarize the key content of the alert based on the input text, which may come from either a PDF or the webpage itself.
+    Focus on:
+    - Type of outbreak or event
+    - Region(s) and country affected
+    - Severity: confirmed cases, deaths, urgency
+    - Any recommended actions or measures
+    Output 2–3 concise sentences in neutral tone.
+
+alert:
+  score:
+    weight:
+      event_type: 2
+      affected: 1.5
+      region: 1
+      keywords: 1
+    threshold: 5
+  notify:
+    - telegram://@health_alerts
+    - email://crisis.team@ngo.org
+  template: |
+    🚨 [WHO Alert] {{ normalized.event_type | upper }} in {{ normalized.country or normalized.region }}
+
+    {{ gpt_summary }}
+
+    📎 PDF: {{ document_link }}
+    🧪 Tags: {{ normalized.keywords | join(', ') }}
+
+test_event:
+  url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-07-14-nipah-virus-in-bangladesh
