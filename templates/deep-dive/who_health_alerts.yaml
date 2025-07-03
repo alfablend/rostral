@@ -21,18 +21,18 @@ fetch:
     User-Agent: rostral-bot/1.0
 
 extract:
-  title: main h1
-  date: div.timestamp time::attr(datetime)
-  raw_text: div.sf-detail-body-wrapper
-  pdf: a[href$=".pdf"]::attr(href)
+  title: "div.heading h1"
+  date: "div.timestamp time::attr(datetime)"
+  raw_text: "div.sf-detail-body-wrapper"
+  pdf: "a[href$='.pdf']::attr(href)"
 
 normalize:
   trim: true
   fields:
-    country: extract_by_pattern("Country:\\s+([A-Z][a-zA-Z\\s]+)")
-    event_type: extract_by_keywords(["cholera", "dengue", "ebola", "covid", "nipah"])
-    affected: extract_by_regex("(?i)(\\d{2,6}) (cases|deaths|confirmed)")
-    region: extract_by_pattern("Region:\\s+([\\w\\s]+)")
+    country: extract_by_pattern("(?i)Bangladesh|India|Nepal|Thailand|Malaysia")
+    event_type: extract_by_keywords(["nipah", "cholera", "dengue", "ebola", "covid"])
+    affected: extract_by_regex("(?i)(\\d{1,4}) (cases|deaths|fatalities|confirmed)")
+    region: extract_by_pattern("(?i)district of ([A-Z][a-z]+)|division of ([A-Z][a-z]+)")
     keywords: detect_keywords()
     document: "{{ pdf }}"
 
@@ -61,4 +61,4 @@ alert:
     {% endif %}
 
 test_event:
-  url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442
+  url: https://www
