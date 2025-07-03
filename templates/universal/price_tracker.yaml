@@ -5,27 +5,31 @@ meta:
   name: Price Tracker
   description: Monitors a product page for price or availability changes
 
-# This template serves as a universal example for HTML monitoring.
-# The URL below is a placeholder. Users should replace it with a real product page.
-# CSS selectors should be customized for the target website.
+# This template defines a universal HTML-based tracker.
+# Users should replace the URL and CSS selectors to match their target website.
+# The structure is aligned with other Rostral templates (alert.template + normalized.*).
 
 source:
   type: html
-  url: https://example.com/product-page  # ← Replace with real product URL
-  frequency: daily
+  url: https://example.com/product-page        # ← Replace with the actual product page URL
+  frequency: daily                             # ← Polling interval (can be changed)
 
 extract:
-  title: h1.product-title               # ← Adjust based on actual markup
+  title: h1.product-title                      # ← Adjust based on real HTML
   price: ".price-value"
   availability: ".stock-status"
 
+normalize:
+  passthrough: true                            # ← Automatically maps extract.* → normalized.*
+
 alert:
-  title: "Price update for {{ title }}"
-  text: |
-    New price: {{ price }}
-    Availability: {{ availability }}
-  when: price
+  # Single template used to generate the full alert message
+  # Uses normalized fields: title, price, availability
+  template: |
+    🛍️ Price update for {{ normalized.title }}
+    New price: {{ normalized.price }}
+    Availability: {{ normalized.availability }}
 
 test_event:
-  url: https://example.com/product-page
-  note: Placeholder event used for testing extract structure
+  url: https://example.com/product-page        # ← Example product page for manual testing
+  note: Placeholder only — should be replaced with a real test URL
