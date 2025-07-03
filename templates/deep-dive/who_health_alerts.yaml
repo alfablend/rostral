@@ -21,9 +21,9 @@ fetch:
     User-Agent: rostral-bot/1.0
 
 extract:
-  raw_text: "section.main-content"
-  title: h1
-  date: time::attr(datetime)
+  title: main h1
+  date: div.timestamp time::attr(datetime)
+  raw_text: div.sf-detail-body-wrapper
   pdf: a[href$=".pdf"]::attr(href)
 
 normalize:
