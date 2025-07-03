@@ -10,7 +10,10 @@ def load_template(path):
 # Download HTML content from the test_event.url
 def get_html(url):
     print(f"🔗 Fetching: {url}")
-    r = requests.get(url, timeout=10)
+    headers = {
+        "User-Agent": "rostral-bot/1.0"
+    }
+    r = requests.get(url, headers=headers, timeout=10)
     r.raise_for_status()
     return r.text
 
