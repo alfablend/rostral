@@ -61,4 +61,5 @@ alert:
     {% endif %}
 
 test_event:
-  url: https://www
+  url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442
+  
