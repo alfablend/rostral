@@ -11,10 +11,16 @@ def load_template(path):
 def get_html(url):
     print(f"🔗 Fetching: {url}")
     headers = {
-        "User-Agent": "rostral-bot/1.0"
-    }
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Accept-Encoding": "gzip, deflate, br"
+}
+r = requests.get(url, headers=headers, timeout=10)
     r = requests.get(url, headers=headers, timeout=10)
     r.raise_for_status()
+    with open("debug_output.html", "w", encoding="utf-8") as f:
+        f.write(r.text)
     return r.text
 
 # Apply CSS selectors from the extract block to parse HTML
