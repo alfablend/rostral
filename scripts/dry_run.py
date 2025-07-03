@@ -15,13 +15,12 @@ def get_html(url):
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
     "Accept-Encoding": "gzip, deflate, br"
-}
-r = requests.get(url, headers=headers, timeout=10)
+    }
     r = requests.get(url, headers=headers, timeout=10)
     r.raise_for_status()
     with open("debug_output.html", "w", encoding="utf-8") as f:
         f.write(r.text)
-    return r.text
+return r.text
 
 # Apply CSS selectors from the extract block to parse HTML
 def extract_fields(html, extract_conf):
