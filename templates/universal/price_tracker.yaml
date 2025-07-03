@@ -1,0 +1,31 @@
+version: 1
+
+meta:
+  id: universal.price_tracker
+  name: Price Tracker
+  description: Monitors a product page for price or availability changes
+
+# This template serves as a universal example for HTML monitoring.
+# The URL below is a placeholder. Users should replace it with a real product page.
+# CSS selectors should be customized for the target website.
+
+source:
+  type: html
+  url: https://example.com/product-page  # ← Replace with real product URL
+  frequency: daily
+
+extract:
+  title: h1.product-title               # ← Adjust based on actual markup
+  price: ".price-value"
+  availability: ".stock-status"
+
+alert:
+  title: "Price update for {{ title }}"
+  text: |
+    New price: {{ price }}
+    Availability: {{ availability }}
+  when: price
+
+test_event:
+  url: https://example.com/product-page
+  note: Placeholder event used for testing extract structure
