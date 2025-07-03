@@ -83,4 +83,4 @@ alert:
     🧪 Tags: {{ normalized.keywords | join(', ') }}
 
 test_event:
-  url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-07-14-nipah-virus-in-bangladesh
+  url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442
