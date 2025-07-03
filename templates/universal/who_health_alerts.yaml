@@ -1,3 +1,5 @@
+# --> CI test string
+
 # File: templates/deep-dive/who_health_alerts.yaml
 # Purpose: Monitor and summarize global health alerts from WHO — with fallback between PDF and HTML
 # Status: spec-draft — used to inform architecture and GPT summarization logic
