@@ -8,7 +8,7 @@ meta:
   tags: [who, health, outbreaks, pdf, ai, multilingual]
   lang: en
   category: global_health
-  status: spec-draft
+  status: stable
 
 source:
   type: rss
@@ -18,18 +18,19 @@ fetch:
   schedule: "0 */6 * * *"
   ttl: 24h
   headers:
-    User-Agent: rostral-bot/1.0
+    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
 
 extract:
-  title: "div.heading h1"
-  date: "div.timestamp time::attr(datetime)"
-  raw_text: "div.sf-detail-body-wrapper"
+  title: "h1.don-title"
+  date: "span.timestamp"
+  raw_text: "article.sf-detail-body-wrapper"
   pdf: "a[href$='.pdf']::attr(href)"
+  country: "h1.don-title::text"
 
 normalize:
   trim: true
   fields:
-    country: extract_by_pattern("(?i)Bangladesh|India|Nepal|Thailand|Malaysia")
+    country: extract_by_pattern("Bangladesh|India|Nepal|Thailand|Malaysia")
     event_type: extract_by_keywords(["nipah", "cholera", "dengue", "ebola", "covid"])
     affected: extract_by_regex("(?i)(\\d{1,4}) (cases|deaths|fatalities|confirmed)")
     region: extract_by_pattern("(?i)district of ([A-Z][a-z]+)|division of ([A-Z][a-z]+)")
@@ -62,4 +63,3 @@ alert:
 
 test_event:
   url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442
-  
