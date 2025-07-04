@@ -25,7 +25,7 @@ extract:
   date: "span.timestamp"
   raw_text: "article.sf-detail-body-wrapper"
   pdf: "a[href$='.pdf']::attr(href)"
-  country: "h1.don-title::text"
+  country: "h1.don-title"
 
 normalize:
   trim: true
