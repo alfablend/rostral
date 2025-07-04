@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+env/
+
+# Debug files
+debug_*.html
+
+# VSCode or IDE
+.vscode/
+.idea/

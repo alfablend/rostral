@@ -1,0 +1,5 @@
+pyyaml
+requests
+beautifulsoup4
+lxml
+jinja2
