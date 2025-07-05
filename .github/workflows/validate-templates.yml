@@ -1,0 +1,17 @@
+name: YAML Template Linter
+
+on:
+  push:
+    paths: ['templates/**/*.yaml']
+  pull_request:
+    paths: ['templates/**/*.yaml']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Установить зависимости
+        run: pip install pyyaml
+      - name: Запустить валидацию шаблонов
+        run: python scripts/validate_yaml.py templates/

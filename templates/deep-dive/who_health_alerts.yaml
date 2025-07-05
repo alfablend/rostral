@@ -1,0 +1,65 @@
+version: 1.0
+
+meta:
+  title: WHO Global Health Alerts
+  description: |
+    Monitor health emergency alerts and outbreak bulletins from the World Health Organization (WHO).
+    If a PDF is available, it will be downloaded and summarized. If not, HTML page content is used instead.
+  tags: [who, health, outbreaks, pdf, ai, multilingual]
+  lang: en
+  category: global_health
+  status: stable
+
+source:
+  type: rss
+  url: https://www.who.int/feeds/entity/emergencies/disease-outbreak-news/en/rss.xml
+
+fetch:
+  schedule: "0 */6 * * *"
+  ttl: 24h
+  headers:
+    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+
+extract:
+  title: "h1.don-title"
+  date: "span.timestamp"
+  raw_text: "article.sf-detail-body-wrapper"
+  pdf: "a[href$='.pdf']::attr(href)"
+  country: "h1.don-title"
+
+normalize:
+  trim: true
+  fields:
+    country: extract_by_pattern("Bangladesh|India|Nepal|Thailand|Malaysia")
+    event_type: extract_by_keywords(["nipah", "cholera", "dengue", "ebola", "covid"])
+    affected: extract_by_regex("(?i)(\\d{1,4}) (cases|deaths|fatalities|confirmed)")
+    region: extract_by_pattern("(?i)district of ([A-Z][a-z]+)|division of ([A-Z][a-z]+)")
+    keywords: detect_keywords()
+    document: "{{ pdf }}"
+
+gpt:
+  model: gpt-4
+  temperature: 0.3
+  prompt: |
+    You are processing a health alert from WHO.
+    Summarize the key content of the alert based on the input text, which may come from either a PDF or the webpage itself.
+    Focus on:
+    - Type of outbreak or event
+    - Region(s) and country affected
+    - Severity: confirmed cases, deaths, urgency
+    - Any recommended actions or measures
+    Output 2–3 concise sentences in neutral tone.
+
+alert:
+  template: |
+    🚨 [WHO Alert] {{ normalized.event_type or 'Unknown event' }} in {{ normalized.country or normalized.region or 'Unknown location' }}
+
+    {{ gpt_summary or 'No summary available.' }}
+
+    📎 PDF: {{ document_link or 'No document available' }}
+    {% if normalized.keywords %}
+    🧪 Tags: {{ normalized.keywords | default([]) | join(', ') }}
+    {% endif %}
+
+test_event:
+  url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442
