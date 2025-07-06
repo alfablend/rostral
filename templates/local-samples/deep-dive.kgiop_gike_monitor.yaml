@@ -1,0 +1,65 @@
+version: 1
+
+meta:
+  id: deep-dive.kgiop_gike_monitor
+  name: Мониторинг ГИКЭ КГИОП
+  description: Отслеживает появление новых историко-культурных экспертиз на сайте КГИОП СПб
+  tags: ["культурное наследие", "СПб", "экспертизы", "PDF"]
+  category: "deep-dive"
+
+source:
+  type: html
+  url: |
+    {% set current_year = now().year %}
+    https://kgiop.gov.spb.ru/deyatelnost/zaklyucheniya-gosudarstvennyh-istoriko-kulturnyh-ekspertiz/gosudarstvennye-istoriko-kulturnye-ekspertizy-za-{{ current_year }}-g/
+  frequency: daily
+  fetch:
+    retry_policy:
+      max_retries: 3
+      backoff_factor: 2
+
+extract:
+  expertises:
+    selector: "a[href*='/media/uploads/userfiles/'], a[href*='disk.yandex.ru']"
+    type: list
+    fields:
+      title: "self"
+      url:
+        attr: "href"
+        transform: |
+          {% if 'disk.yandex.ru' in value %}
+            {% set api_url = 'https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=' + value %}
+            {% set response = http.get(api_url) %}
+            {{ response.json().href }}
+          {% else %}
+            {{ 'https://kgiop.gov.spb.ru' + value }}
+          {% endif %}
+
+normalize:
+  rules:
+    - field: expertises
+      filters:
+        - unique: "url"
+        - filter: "documents"
+          condition: "url.endswith('.pdf')"
+
+gpt:
+  prompt: |
+    Анализ историко-культурной экспертизы:
+    1. Объект: {{ extract("объект культурного наследия", "адрес") }}
+    2. Заказчик: {{ extract("заказчик", "собственник") }}
+    3. Работы: {{ extract("виды работ", "реконструкция", "реставрация") }}
+    4. Выводы: {{ extract("заключение", "рекомендации") }}
+    5. Кадастровые номера: {{ extract("кадастровый номер") }}
+
+alert:
+  template: |
+    🏛 Новый ГИКЭ {{ now().year }} года
+    Объект: {{ gpt.object|default("Нет данных") }}
+    Адрес: {{ gpt.address|default("Не указан") }}
+    {% if gpt.kadastr %}Кадастр: {{ gpt.kadastr }}{% endif %}
+    🔗 Ссылка: {{ normalized.url }}
+
+test_event:
+  url: https://kgiop.gov.spb.ru/media/uploads/userfiles/2023/example_gike.pdf
+  note: Тестовая экспертиза 2023 года
