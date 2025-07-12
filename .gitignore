@@ -3,12 +3,24 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Virtual environments
+# Python virtual environments
+venv/
 .venv/
 env/
+.env/
+
+# Settings files
+*.env
+
+# Database
+*.db
 
 # Debug files
 debug_*.html
+
+# Logging
+*.log
+logs/
 
 # VSCode or IDE
 .vscode/
