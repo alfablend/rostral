@@ -52,14 +52,20 @@ gpt:
 
 alert:
   template: |
-    🚨 [WHO Alert] {{ normalized.event_type or 'Unknown event' }} in {{ normalized.country or normalized.region or 'Unknown location' }}
-
-    {{ gpt_summary or 'No summary available.' }}
-
-    📎 PDF: {{ document_link or 'No document available' }}
-    {% if normalized.keywords %}
-    🧪 Tags: {{ normalized.keywords | default([]) | join(', ') }}
-    {% endif %}
+    {% for event in events %}
+      = Экспертиза {{ loop.index }} =
+      📌 Название: {{ event.title }}
+      🔗 URL: {{ event.url }}
+      
+      {% if event.gpt %}
+      💬 GPT Анализ:
+      {{ event.gpt | trim }}
+      {% else %}
+      ⚠️ GPT анализ недоступен
+      {% endif %}
+      
+      {% if not loop.last %}\n───────\n{% endif %}
+    {% endfor %}
 
 test_event:
   url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442

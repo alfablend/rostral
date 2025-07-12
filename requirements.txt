@@ -1,0 +1,27 @@
+# Core
+pydantic>=1.10
+typer[all]>=0.9
+PyYAML>=6.0
+
+# HTML parsing
+beautifulsoup4>=4.12
+requests>=2.31
+jinja2>=3.1
+
+# PDF processing
+pymupdf>=1.23
+pytesseract>=0.3
+Pillow>=10.0
+
+# GPT backends
+gpt4all>=2.2
+openai>=1.0
+
+# Scheduling
+croniter>=1.4
+
+# Database
+sqlalchemy>=2.0
+
+# Optional (for local dev)
+python-dotenv>=1.0
