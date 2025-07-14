@@ -3,13 +3,7 @@ import typer
 from ast import literal_eval
 
 class NormalizeStage(PipelineStage):
-    """
-    Улучшенная версия NormalizeStage с:
-    - Безопасным eval
-    - Подробным логированием
-    - Сохранением метаданных
-    - Обработкой ошибок на уровне элементов
-    """
+   
 
     def run(self, extracted):
         typer.echo(f"⏳ NormalizeStage input keys: {list(extracted.keys())}")

@@ -3,7 +3,7 @@
 import typer
 import requests
 import urllib3
-from .base import PipelineStage        # ← вот это
+from .base import PipelineStage        
 
 # опционально, чтобы не видеть InsecureRequestWarning
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

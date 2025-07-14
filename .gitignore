@@ -25,3 +25,6 @@ logs/
 # VSCode or IDE
 .vscode/
 .idea/
+
+# Templates under condtruction
+deep-dive.focus_arbitr_monitor.yaml

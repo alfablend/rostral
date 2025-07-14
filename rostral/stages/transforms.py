@@ -13,7 +13,7 @@ def transform_smart_url(url: str, *, template_name: Optional[str] = None, base_u
 
     # Обработка относительных путей
     if url.startswith("/"):
-        return urllib.parse.urljoin(base_url or "https://kgiop.gov.spb.ru", url)
+        return urllib.parse.urljoin(base_url, url)
     
     # Обработка Яндекс.Диска
     if "yandex.ru" in url.lower() or "yadi.sk" in url.lower():

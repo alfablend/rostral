@@ -25,26 +25,17 @@ class DownloadStage(PipelineStage):
 
     def _download_file(self, url: str, verify_ssl: bool) -> Optional[bytes]:
         """Загружает файл с обработкой ошибок"""
+        source = self.config.source
+        headers = source.fetch.headers or {}
         try:
             with requests.get(
                 url,
                 stream=True,
                 timeout=self.config.download.timeout,
                 verify=verify_ssl,
-                headers={'User-Agent': 'Mozilla/5.0'}
+                headers=headers
             ) as response:
                 response.raise_for_status()
-                
-                # Для Яндекс.Диска проверяем Content-Disposition на наличие .pdf
-                content_disposition = response.headers.get('Content-Disposition', '').lower()
-                if 'yandex' in url and '.pdf' in content_disposition:
-                    pass  # Это PDF с Яндекс.Диска, пропускаем проверку Content-Type
-                else:
-                    # Проверка Content-Type для всех остальных случаев
-                    content_type = response.headers.get('Content-Type', '').lower()
-                    if not ('pdf' in content_type or 'octet-stream' in content_type):
-                        typer.echo(f"⚠️ Неподдерживаемый Content-Type: {content_type}")
-                        return None
                 
                 content = bytearray()
                 for chunk in response.iter_content(chunk_size=self.chunk_size):
@@ -71,11 +62,13 @@ class DownloadStage(PipelineStage):
             return False
 
         # Преобразуем URL
+        base_url = self.config.source.url.split('?')[0].split('#')[0] if self.config.source.url else None
         transformed_url = transform_smart_url(
             url,
             template_name=self.config.template_name,
-            base_url=self.config.source.url.split('?')[0].split('#')[0] if self.config.source.url else None
+            base_url=base_url
         )
+
 
         # Проверяем, нужно ли загружать
         if not self._is_pdf_url(transformed_url):

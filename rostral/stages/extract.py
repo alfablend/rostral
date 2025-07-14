@@ -23,7 +23,8 @@ class ExtractStage(PipelineStage):
             limit = getattr(block_cfg, "limit", None)
             if limit is not None:
                 elements = soup.select(block_cfg.selector)[:limit]
-
+            else:
+                elements = soup.select(block_cfg.selector)
             typer.echo(f"   ➤ Found {len(elements)} elements, limit={limit if limit is not None else 'None'}")
 
             items = []
