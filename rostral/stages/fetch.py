@@ -13,6 +13,7 @@ class FetchStage(PipelineStage):
     def run(self, data):
         source = self.config.source
         url = self.render_url(source.url)
+        source.url = url
         headers = source.fetch.headers or {}
         verify = getattr(source.fetch, "verify_ssl", True)
 
@@ -26,7 +27,7 @@ class FetchStage(PipelineStage):
         typer.echo(f"📥 Ответ FetchStage: статус {response.status_code}")
         response.raise_for_status()
 
-        if source.type == "html":
+        if source.type == "html" or source.type == "rss":
             return {"html": response.text}
         else:
             return {"json": response.json()}

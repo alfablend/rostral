@@ -69,7 +69,6 @@ class DownloadStage(PipelineStage):
             base_url=base_url
         )
 
-
         # Проверяем, нужно ли загружать
         if not self._is_pdf_url(transformed_url):
             typer.echo(f"⏭️ Пропущено: URL не распознан как PDF ({transformed_url})")

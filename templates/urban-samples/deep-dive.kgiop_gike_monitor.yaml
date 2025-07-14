@@ -1,3 +1,4 @@
+# For educational purposes only
 version: 1
 template_name: kgiop_monitor
 meta:
@@ -43,7 +44,6 @@ normalize:
       filters:
         - unique: "url"
         - filter: "documents"
-          #condition: "url.endswith('.pdf')"
 
 gpt:
   prompt: |

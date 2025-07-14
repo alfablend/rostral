@@ -1,4 +1,5 @@
 version: 1.0
+template_name: who_monitor
 
 meta:
   title: WHO Global Health Alerts
@@ -12,34 +13,35 @@ meta:
 
 source:
   type: rss
-  url: https://www.who.int/feeds/entity/emergencies/disease-outbreak-news/en/rss.xml
-
-fetch:
-  schedule: "0 */6 * * *"
-  ttl: 24h
-  headers:
-    User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
-
+  url: http://www.emro.who.int/index.php?option=com_mediarss&feed_id=3&format=raw
+  frequency: hourly  
+  fetch:
+    ttl: 24h
+    headers:
+      User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
+    retry_policy:  
+      max_retries: 3
+      backoff_factor: 2
 extract:
-  title: "h1.don-title"
-  date: "span.timestamp"
-  raw_text: "article.sf-detail-body-wrapper"
-  pdf: "a[href$='.pdf']::attr(href)"
-  country: "h1.don-title"
+  events:
+    selector: "item"
+    type: list
+    limit: 5
+    fields: 
+      title: "self"
+      url: 
+        attr: "href"
+        transform_type: "smart_url"
 
+  
 normalize:
-  trim: true
-  fields:
-    country: extract_by_pattern("Bangladesh|India|Nepal|Thailand|Malaysia")
-    event_type: extract_by_keywords(["nipah", "cholera", "dengue", "ebola", "covid"])
-    affected: extract_by_regex("(?i)(\\d{1,4}) (cases|deaths|fatalities|confirmed)")
-    region: extract_by_pattern("(?i)district of ([A-Z][a-z]+)|division of ([A-Z][a-z]+)")
-    keywords: detect_keywords()
-    document: "{{ pdf }}"
+  rules:
+    - field: events
+      filters:
+        - filter: "documents"
+          condition: "'WHO' in item.text or 'World Health Organization' in item.text"
 
 gpt:
-  model: gpt-4
-  temperature: 0.3
   prompt: |
     You are processing a health alert from WHO.
     Summarize the key content of the alert based on the input text, which may come from either a PDF or the webpage itself.
@@ -50,22 +52,28 @@ gpt:
     - Any recommended actions or measures
     Output 2–3 concise sentences in neutral tone.
 
-alert:
-  template: |
-    {% for event in events %}
-      = Экспертиза {{ loop.index }} =
-      📌 Название: {{ event.title }}
-      🔗 URL: {{ event.url }}
-      
-      {% if event.gpt %}
-      💬 GPT Анализ:
-      {{ event.gpt | trim }}
-      {% else %}
-      ⚠️ GPT анализ недоступен
-      {% endif %}
-      
-      {% if not loop.last %}\n───────\n{% endif %}
-    {% endfor %}
+    This is the text: {{ text }}
 
-test_event:
-  url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442
+alert:
+  templates:
+    who: |
+      {% for event in events %}
+        = WHO doc {{ loop.index }} =
+        📌 Name: {{ event.title }}
+        🔗 URL: {{ event.url }}
+        
+        {% if event.gpt %}
+        💬 GPT summary:
+        {{ event.gpt | trim }}
+        {% else %}
+        ⚠️ GPT summary not available.
+        {% endif %}
+        
+        {% if event.date %}
+        {% endif %}
+        
+        {% if not loop.last %}\n───────\n{% endif %}
+      {% endfor %}
+
+  test_event:
+    url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442
