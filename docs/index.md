@@ -1,12 +1,12 @@
 # Rostral.io
 
 <p align="right">
-  🇷🇺 [Русский](#русская-версия) • 🇬🇧 English
+   [Русский](#русская-версия) • English
 </p>
 
 ---
 
-## 🧠 Semantic monitoring made simple  
+## Semantic monitoring made simple  
 _Select a template. Track events. Surface meaning._
 
 **Rostral.io** is an open-source CLI that monitors RSS feeds, HTML pages, APIs, and documents —  
@@ -15,7 +15,7 @@ and extracts meaningful events with AI assistance.
 Launch templates via interactive CLI menu.
 ---
 
-### 🔗 Quick Links
+### Quick Links
 
 - [GitHub Repository](https://github.com/alfablend/rostral.io)  
 - [Specification](TECHNICALSPEC.md)  
@@ -38,7 +38,7 @@ All you need in one feed — powered by AI and YAML.
 
 ---
 
-## 🧠 Смысловой мониторинг в один клик  
+## Смысловой мониторинг в один клик  
 _Выберите шаблон. Отследите событие. Получите суть._
 
 **Rostral.io** — это open-source CLI-инструмент, отслеживающий RSS-ленты, HTML, API и документы —  
@@ -61,4 +61,3 @@ _Выберите шаблон. Отследите событие. Получи�
 
 ---
 
-Все смыслы — в одном потоке. Управляется через AI и YAML.
