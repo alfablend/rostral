@@ -1,0 +1,84 @@
+# For educational purposes only
+version: 1
+template_name: focus_arbitr_monitor
+meta:
+  id: deep-dive.focus_arbitr_monitor
+  name: "Мониторинг арбитражных решений"
+  description: "Полноценный парсинг с HTML-ответом"
+
+source:
+  type: html
+  url: "https://focus.kontur.ru/content/mon"
+  method: GET
+  frequency: hourly  # Обязательное поле
+  fetch:
+    headers:
+      User-Agent: "Mozilla/5.0"
+      Content-Type: "application/x-www-form-urlencoded"
+      Accept: "application/json"
+      Accept-Language: "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3"
+      Accept-Encoding: "gzip, deflate, br, zstd"
+      Referer: "https://focus.kontur.ru/mon"
+      Content-Type: "application/x-www-form-urlencoded; charset=utf-8"
+      x-reactapp-version: "1ae6cd44b847591c8745"
+      Connection: "keep-alive"
+      Cookie: "ngtoken=LhHL+mRTYksUkoHyBF6kAg==; location_city=5919; vid=239986925a2c44558430e9fbfa496256; cU4; _kfpxv5=7b6a6d14cf2131817fa38e91ae3c5b4cfe4b8de5; nolgn=1; token=djnDp40Uq44g1Mr0fBd5tjYIz6G1HBQE6+tiijkxwn26FHLPNZr44vxBCtYWOg8LpD+a7mC0ZHfnUhxxpAEBqRNTXUKNEiobh6FkQWFwKjTgJv+DB2LtKVkJgTVIxrsn; auth.check=C9F847B0E0619902BF662EBE711F7ADA0215BDF95B55E22B3F7C5D6C9334CF23; auth.sid=F18DDF49A89C954FBAFD5E585146329D9165878D12725347BB7FA48BC9A9E5C7; promo=2311; location_region=78; fsr=6628d6ed-c1b4-41fd-8094-6bc63db3a6d7; _kmts=xSh7wnr5Yi; portaluserid=49df8df1-9ca8-4f95-bafd-5e585146329d; _mfp=7b6a6d14cf2131817fa38e91ae3c5b4cfe4b8de5"
+    body: "jurisdiction=78&type=arbitration&limit=100"
+    verify_ssl: false
+    timeout: 30
+    retry_policy:  
+      max_retries: 3
+      backoff_factor: 2
+
+extract:
+  events:
+    selector: 'a[href*="pdf"]'
+    type: list  
+    limit: 2
+    fields: 
+      title: "self"
+      url: 
+        attr: "href"
+        transform_type: "smart_url"
+
+download:
+  extensextensions: [".pdf"]  
+  timeout: 20    
+
+processing: {}
+
+
+normalize:
+  rules:
+    - field: events
+      filters:
+        - unique: "url"
+        - filter: "documents"
+          condition: "'Санкт-Петербург' in item.text.lower()"
+
+gpt:
+  prompt: |
+    
+    Проанализируй текст судебного решения и выдели:
+
+    1. Кто истец
+    2. Кто ответчик
+    3. Суть решения
+
+    Вот текст: {{ text }}
+
+alert:
+  templates:
+    expertise: |
+      {% for event in events %}
+      === Судебный акт {{ loop.index }} ===
+      Название: {{ event.title }}
+      {% if event.gpt is not none and event.gpt %}
+      Анализ:
+      {% for key, value in event.gpt.items() %}
+      - {{ key }}: {{ value }}
+      {% endfor %}
+      {% else %}
+      ℹ️ Анализ отсутствует
+      {% endif %}
+      {% endfor %}
