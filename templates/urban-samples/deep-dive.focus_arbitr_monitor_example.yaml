@@ -33,7 +33,7 @@ extract:
         transform_type: "smart_url"
 
 download:
-  extensextensions: [".pdf"]  
+  extensions: [".pdf"]  
   timeout: 20    
 
 processing: {}
