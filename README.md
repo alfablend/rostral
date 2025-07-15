@@ -22,7 +22,7 @@ You can self-host it today and watch for updates on our upcoming SaaS alpha.
 Rostral includes a command-line interface with interactive selection:
 
 ```bash
-rostral monitor
+python -m rostral
 ```
 
 Select a monitoring template from the menu — and Rostral will begin tracking it immediately.
