@@ -11,8 +11,9 @@ load_dotenv()
 
 try:
     from gpt4all import GPT4All
-    gpt4all_model_path = os.getenv("GPT4ALL_MODEL_PATH")
-    gpt4all_model = GPT4All(model_name=gpt4all_model_path) if gpt4all_model_path else None
+    gpt4all_model_path = str(Path(os.getenv("GPT4ALL_MODEL_PATH")).absolute())
+    gpt4all_model_name = os.getenv("GPT4ALL_MODEL_NAME")
+    gpt4all_model = GPT4All(model_name=gpt4all_model_name, model_path=gpt4all_model_path, allow_download=False) if gpt4all_model_name else None
 except ImportError:
     gpt4all_model = None
 
