@@ -30,7 +30,6 @@ Select a monitoring template from the menu — and Rostral will begin tracking i
 ✅ Built-in templates include (these first developed for testing purposes):
 
 - `deep-dive.kgiop_gike_monitor.yaml` (monitor culture heritage documents in St Petersburg)
-- `deep-dive.focus_arbitr_monitor.yaml` (monitor decisions of arbitral tribunals, row, currently need Kontur.Focus account)
 - under development: `whohealth_alerts.yaml`(detects public health events) and`price_tracker.yaml` (monitors prices across sites)
 
 No flags, no boilerplate — the CLI guides you through execution step-by-step.
@@ -69,7 +68,6 @@ Each one includes:
 - ✅ CLI scaffold active: `rostral monitor`  
 - 🧪 Manual scripts for validation and dry-run  
 - 🚧 Web UI in design phase  
-- 🔜 SaaS sandbox planned
 
 ---
 
