@@ -15,7 +15,7 @@ class DownloadConfig(BaseModel):
     """
     extensions: List[str] = [".pdf", ".docx"]
     timeout: int = 20
-
+    allow_html: bool = False
 
 class FetchConfig(BaseModel):
     headers: Dict[str, str] = {}
@@ -94,7 +94,7 @@ class Config(BaseModel):
 
     test_event: Optional[TestEvent] = None
     secrets: Optional[Dict[str, Any]] = None
-
+    
 
 def load_yaml_config(path: str) -> Config:
     """

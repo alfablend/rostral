@@ -6,6 +6,8 @@ class NormalizeStage(PipelineStage):
    
 
     def run(self, extracted):
+        self._seen_unique = set()
+
         typer.echo(f"⏳ NormalizeStage input keys: {list(extracted.keys())}")
 
         if not extracted or not hasattr(self.config, 'normalize') or not self.config.normalize.rules:

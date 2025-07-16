@@ -4,6 +4,7 @@ import typer
 from typer import colors
 
 from rostral.stages.fetch import FetchStage
+from rostral.stages.event_html import EventHTMLStage
 from rostral.stages.extract import ExtractStage
 from rostral.stages.download import DownloadStage
 from rostral.stages.normalize import NormalizeStage
@@ -31,6 +32,11 @@ class PipelineRunner:
         if config.download:
             self.stages.append(DownloadStage(config))
             typer.echo(f"Download config: {config.download}")
+
+        if getattr(config.download, "allow_html", False):
+            self.stages.append(EventHTMLStage(config))
+            typer.echo("🧠 EventHTMLStage добавлен: активирована HTML-обработка")
+            
         if config.normalize:
             self.stages.append(NormalizeStage(config))
         if config.processing:

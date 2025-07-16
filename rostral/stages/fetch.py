@@ -27,7 +27,11 @@ class FetchStage(PipelineStage):
         typer.echo(f"📥 Ответ FetchStage: статус {response.status_code}")
         response.raise_for_status()
 
-        if source.type == "html" or source.type == "rss":
+        if source.type == "html":
             return {"html": response.text}
-        else:
+        elif source.type == "rss":
+            return {"xml": response.text}
+        elif source.type == "json":
             return {"json": response.json()}
+        else:
+            raise ValueError(f"Unsupported source type: {source.type}")
