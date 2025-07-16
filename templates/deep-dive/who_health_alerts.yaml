@@ -13,7 +13,7 @@ meta:
 
 source:
   type: rss
-  url: http://www.emro.who.int/index.php?option=com_mediarss&feed_id=3&format=raw
+  url: https://www.who.int/rss-feeds/news-english.xml
   frequency: hourly  
   fetch:
     ttl: 24h
@@ -28,10 +28,15 @@ extract:
     type: list
     limit: 5
     fields: 
-      title: "self"
-      url: 
-        attr: "href"
-        transform_type: "smart_url"
+      title: 
+          attr: "title"
+      url:
+          attr: "link"
+
+download:
+  extensions: ['.pdf', '.docx']
+  timeout: 20
+  allow_html: true
 
   
 normalize:
@@ -39,7 +44,7 @@ normalize:
     - field: events
       filters:
         - filter: "documents"
-          condition: "'WHO' in item.text or 'World Health Organization' in item.text"
+          condition: "'WHO' in item.page_text or 'World Health Organization' in item.page_text"
 
 gpt:
   prompt: |

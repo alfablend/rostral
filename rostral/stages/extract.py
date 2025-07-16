@@ -11,11 +11,18 @@ class ExtractStage(PipelineStage):
     """
 
     def run(self, data):
-        if not data.get("html"):
-            typer.echo("⚠️  ExtractStage: no HTML found in input")
+        html_input = data.get("html") or data.get("xml")
+        typer.echo(f"🔬 Превью входного текста:\n{html_input[:500]}")
+
+        if not html_input: 
+            typer.echo("⚠️  ExtractStage: no HTML or XML found in input")
             return {}
 
-        soup = BeautifulSoup(data["html"], "html.parser")
+        source_type = self.config.source.type
+        parser_type = "html.parser" if source_type == "html" else "xml"
+        soup = BeautifulSoup(html_input, parser_type)
+
+
         result = {}
 
         for block_name, block_cfg in (self.config.extract or {}).items():
@@ -40,11 +47,11 @@ class ExtractStage(PipelineStage):
                         # Case 2: full ExtractFieldConfig
                         elif isinstance(rule, ExtractFieldConfig):
                             # Step 1: get raw value
-                            if rule.attr:
-                                raw = el.get(rule.attr, "").strip()
+                            if parser_type == "xml" and rule.attr:
+                                target = el.find(rule.attr)
+                                raw = target.text.strip() if target else ""
                             else:
-                                raw = el.get("href") or el.get("src") or ""
-                                raw = raw.strip()
+                                raw = el.get(rule.attr, "").strip()
 
                             value = raw
 
