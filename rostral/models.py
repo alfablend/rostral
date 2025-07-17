@@ -3,9 +3,9 @@ from typing import Any, Dict, List, Optional, Union
 import yaml
 from pathlib import Path
 
-from sqlalchemy import Column, String, Float, create_engine
+from sqlalchemy import Column, String, Float,  Integer, Text, DateTime
+from datetime import datetime, timezone
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 
 class DownloadConfig(BaseModel):
     """
@@ -117,3 +117,17 @@ class TransformCache(Base):
     input = Column(String, primary_key=True)
     output = Column(String)
     updated_at = Column(Float)
+
+timestamp = datetime.now(timezone.utc)
+class Event(Base):
+    __tablename__ = "events"
+
+    id = Column(Integer, primary_key=True)
+    url = Column(String, unique=True)
+    title = Column(String(500))
+    text = Column(Text)
+    excerpt = Column(Text)
+    gpt_text = Column(Text)
+    error = Column(Text, nullable=True)
+    status = Column(String(50), default="pending")
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
