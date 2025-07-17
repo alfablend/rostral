@@ -25,6 +25,7 @@ class DownloadStage(PipelineStage):
 
     def _download_file(self, url: str, verify_ssl: bool) -> Optional[bytes]:
         """Загружает файл с обработкой ошибок"""
+        time.sleep(0.5)
         source = self.config.source
         headers = source.fetch.headers or {}
         try:

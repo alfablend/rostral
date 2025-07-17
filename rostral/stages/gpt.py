@@ -107,6 +107,8 @@ class GPTStage(PipelineStage):
         """Генерирует промпт с явным указанием формата ответа"""
         prompt_template = (
             self.config.gpt.prompt + 
+            "\n\nТы — ассистент, который дает четкие и короткие ответы." 
+            "\nНе рассуждай, просто отвечай по делу." 
             "\n\nОтвечай строго по указанному формату, без пояснений и тегов."
             "\nНе используй теги <think> или другие XML-разметки."
         )
@@ -142,7 +144,9 @@ class GPTStage(PipelineStage):
                     prompt,
                     max_tokens=1024,
                     streaming=True,
-                    temp=0.3  # Уменьшаем "креативность"
+                    temp=0.3, 
+                    top_k=30,  
+                    top_p=0.8,   
                 ):
                     print(chunk, end="", flush=True)
                     response += chunk
