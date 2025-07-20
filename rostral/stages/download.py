@@ -58,7 +58,7 @@ class DownloadStage(PipelineStage):
 
     def _process_record(self, record: Dict[str, Any], verify_ssl: bool) -> bool:
         """Обрабатывает одну запись"""
-        url = record.get("url")
+        url = record.get("url_final") or record.get("url")
         if not url:
             return False
 

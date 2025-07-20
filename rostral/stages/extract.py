@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
 import typer
+from urllib.parse import urljoin
 from .base import PipelineStage
 from rostral.models import ExtractFieldConfig
 from rostral.stages.transforms import TRANSFORM_REGISTRY
-
+from rostral.db import is_known_by_hash 
+from rostral.db import get_event_hash
 class ExtractStage(PipelineStage):
     """
     Parses HTML, selects elements and builds records
@@ -21,7 +23,7 @@ class ExtractStage(PipelineStage):
         source_type = self.config.source.type
         parser_type = "html.parser" if source_type == "html" else "xml"
         soup = BeautifulSoup(html_input, parser_type)
-
+        base_url = self.config.source.url
 
         result = {}
 
@@ -63,19 +65,31 @@ class ExtractStage(PipelineStage):
                             if rule.transform_type:
                                 fn = TRANSFORM_REGISTRY.get(rule.transform_type)
                                 typer.echo(f"   🔧 Applying transform_type='{rule.transform_type}' to '{raw}'")
-                                value = fn(raw, template_name=self.config.template_name) if fn else raw  # Добавлен template_name
+                                value = fn(raw, template_name=self.config.template_name, base_url=base_url)
 
                         else:
                             typer.echo(f"⚠️  Unsupported rule type for field '{field_name}'")
                             value = ""
 
                         record[field_name] = value
+                        
+
+                        if "url" in record:
+                            full_url = urljoin(base_url, record["url"])
+                            record["url_final"] = full_url
+                        else:
+                            full_url = None
+
+                        if "url" in record and is_known_by_hash(record):
+                            typer.echo(f"⏭️  Пропущено: URL уже в базе → {record['url_final']}")
+                            continue  # 👈 не сохраняем, если уже было
 
                     except Exception as e:
                         typer.echo(f"❌ Error extracting field '{field_name}': {e}")
                         record[field_name] = ""
 
                 typer.echo(f"   📄 Record: {record}")
+                record["event_id"] = get_event_hash(record)
                 items.append(record)
 
             typer.echo(f"   ✔ Collected {len(items)} records for '{block_name}'")

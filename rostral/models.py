@@ -2,8 +2,7 @@ from pydantic import BaseModel, HttpUrl
 from typing import Any, Dict, List, Optional, Union
 import yaml
 from pathlib import Path
-
-from sqlalchemy import Column, String, Float,  Integer, Text, DateTime
+from sqlalchemy import Column, String, Float, Integer, Text, DateTime
 from datetime import datetime, timezone
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -121,8 +120,9 @@ class TransformCache(Base):
 timestamp = datetime.now(timezone.utc)
 class Event(Base):
     __tablename__ = "events"
-
+    
     id = Column(Integer, primary_key=True)
+    event_id = Column(String, unique=True)
     url = Column(String, unique=True)
     title = Column(String(500))
     text = Column(Text)

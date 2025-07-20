@@ -3,6 +3,8 @@ from datetime import datetime
 from jinja2 import Template
 from typing import Dict, Any
 from .base import PipelineStage
+from db import is_known_by_hash, save_event
+
 
 class AlertStage(PipelineStage):
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -22,6 +24,7 @@ class AlertStage(PipelineStage):
                             item['gpt'] = data['gpt_responses'].get(doc_id, {})
 
         # Рендерим алерты
+        print(f"🔍 Количество событий в AlertStage: {len(data.get('events', []))}")
         rendered_alerts = {}
         for template_name, template_str in self.config.alert.templates.items():
             try:
@@ -42,6 +45,14 @@ class AlertStage(PipelineStage):
                 print(f"{Fore.RED}❌ {error_msg}{Style.RESET_ALL}")
 
         print(f"{Fore.GREEN}✅ AlertStage завершен{Style.RESET_ALL}")
+        if "events" in data and isinstance(data["events"], list):
+            for record in data["events"]:
+                if is_known_by_hash(record):
+                    record["status"] = "skipped"
+                    continue
+                if isinstance(record, dict) and "url" in record:
+                    save_event(record)
+                    print(f"{Fore.BLUE}💾 Событие сохранено: {record['url']}{Style.RESET_ALL}")
         return {"alert": rendered_alerts}
 
     def _print_alert(self, content: str, alert_name: str):
@@ -56,6 +67,7 @@ class AlertStage(PipelineStage):
                     print(f"{Fore.YELLOW}{line}{Style.RESET_ALL}")
                 elif any(line.lstrip().startswith(x) for x in ['-', '•', '*']):
                     print(f"  {Fore.GREEN}{line.lstrip()}{Style.RESET_ALL}")
+                    print(f"{Fore.MAGENTA}Событие есть в базе, сохранение пропущено{Style.RESET_ALL}")
                 elif ':' in line:
                     key, val = line.split(':', 1)
                     print(f"{Fore.MAGENTA}{key}:{Style.RESET_ALL}{val}")
