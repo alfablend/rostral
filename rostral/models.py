@@ -58,9 +58,8 @@ class NormalizeConfig(BaseModel):
     rules: List[NormalizeRule]
 
 
-class ProcessingConfig(BaseModel):
-    # Extend if you have processing-specific settings
-    pass
+class ProcessingConfig(BaseModel):  
+    extract_keywords: List[str] = []
 
 
 class GPTConfig(BaseModel):
@@ -131,3 +130,4 @@ class Event(Base):
     error = Column(Text, nullable=True)
     status = Column(String(50), default="pending")
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    template_name = Column(String) 

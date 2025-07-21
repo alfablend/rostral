@@ -24,7 +24,7 @@ extract:
   events:
     selector: "a[href*='/media/uploads/userfiles/'], a[href*='disk.yandex.ru']"
     type: list
-    limit: 10
+    limit: 1
     fields:
       title: "self"
       url:
@@ -35,7 +35,7 @@ download:
   timeout: 20    
 
 processing:
-  extract_keywords: ["объект экспертизы", "предусматривается", "заказчик", "вывод экспертизы"]
+  extract_keywords: ["объект", "предусматривает", "заказчик", "вывод"]
 
 
 normalize:

@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import sessionmaker
-from models import Base, Event 
+from .models import Base, Event 
 from datetime import datetime, timezone
 import hashlib
 
@@ -32,12 +32,13 @@ def is_known_by_url(url: str) -> bool:
     session.close()
     return result
 
-def save_event(record: dict):
+def save_event(record: dict, config=None):
     session = Session()
 
     if is_known_by_hash(record):
         session.close()
         return
+        
     event_id = get_event_hash(record)
     title = record.get("title", "")
     text = record.get("text", "")
@@ -51,9 +52,8 @@ def save_event(record: dict):
         error=record.get("error"),
         status=record.get("status", "pending"),
         timestamp=record.get("timestamp", datetime.now(timezone.utc)),
+        template_name=record.get("template_name", config.template_name if config else None)
     )
     session.add(event)
     session.commit()
     session.close()
-
-

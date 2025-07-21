@@ -16,24 +16,34 @@ CHUNK_HEAD = int(os.getenv("GPT_CHUNK_HEAD", TEXT_MAX_LENGTH // 2))
 CHUNK_TAIL = int(os.getenv("GPT_CHUNK_TAIL", TEXT_MAX_LENGTH // 2))
 
 def extract_text_fragments(text: str, keywords: List[str],
-                           max_fragment_length=MAX_FRAGMENT_LENGTH,
-                           total_max_length=TEXT_MAX_LENGTH) -> str:
+                         max_fragment_length=MAX_FRAGMENT_LENGTH,
+                         total_max_length=TEXT_MAX_LENGTH) -> str:
+    if not text or not keywords:
+        return text[:total_max_length] if text else ""
+    
     fragments = []
     lower_text = text.lower()
+    lower_keywords = [kw.lower() for kw in keywords]
     
-    for kw in keywords:
-        idx = lower_text.find(kw.lower())
+    for kw in lower_keywords:
+        idx = lower_text.find(kw)
         if idx == -1:
             continue
 
         start = max(0, idx - max_fragment_length // 2)
-        end = min(len(text), idx + max_fragment_length // 2)
+        end = min(len(text), idx + len(kw) + max_fragment_length // 2)
 
         fragment = text[start:end].strip()
-        fragments.append(fragment)
+        if fragment not in fragments:  # Избегаем дубликатов
+            fragments.append(fragment)
 
-    excerpt = " ".join(fragments)
-    return excerpt[:CHUNK_HEAD] + " ... " + excerpt[-CHUNK_TAIL:] if len(excerpt) > total_max_length else excerpt
+    if not fragments:
+        return text[:total_max_length] if text else ""
+        
+    excerpt = " [...] ".join(fragments)
+    if len(excerpt) > total_max_length:
+        return excerpt[:CHUNK_HEAD] + " [...] " + excerpt[-CHUNK_TAIL:]
+    return excerpt
 
 class ProcessingStage(PipelineStage):
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -99,8 +109,10 @@ class ProcessingStage(PipelineStage):
             return False
 
         keywords = getattr(self.config.processing, "extract_keywords", [])
+    
         if keywords:
             excerpt = extract_text_fragments(text, keywords)
+
             record["excerpt"] = excerpt
             if not excerpt.strip():
                 typer.echo(f"⚠️ Ключевые слова не найдены в тексте → {record.get('url')}")

@@ -35,11 +35,12 @@ class PipelineRunner:
 
         if getattr(config.download, "allow_html", False):
             self.stages.append(EventHTMLStage(config))
-            typer.echo("🧠 EventHTMLStage добавлен: активирована HTML-обработка")   
+            typer.echo("🧠 EventHTMLStage добавлен: активирована HTML-обработка")
+            
+        if config.normalize:
+            self.stages.append(NormalizeStage(config))
         if config.processing:
             self.stages.append(ProcessingStage(config))
-        if config.normalize:
-            self.stages.append(NormalizeStage(config))    
         if config.gpt:
             self.stages.append(GPTStage(config))
         if config.alert:
