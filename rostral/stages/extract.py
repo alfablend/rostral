@@ -4,8 +4,8 @@ from urllib.parse import urljoin
 from .base import PipelineStage
 from rostral.models import ExtractFieldConfig
 from rostral.stages.transforms import TRANSFORM_REGISTRY
-from rostral.db import is_known_by_hash 
-from rostral.db import get_event_hash
+from rostral.db import is_known_by_hash, get_event_hash
+
 class ExtractStage(PipelineStage):
     """
     Parses HTML, selects elements and builds records
@@ -13,11 +13,12 @@ class ExtractStage(PipelineStage):
     """
 
     def run(self, data):
+        seen_urls = set()
         html_input = data.get("html") or data.get("xml")
         typer.echo(f"🔬 Превью входного текста:\n{html_input[:500]}")
 
         if not html_input: 
-            typer.echo("⚠️  ExtractStage: no HTML or XML found in input")
+            typer.echo("⚠️ ExtractStage: no HTML or XML found in input")
             return {}
 
         source_type = self.config.source.type
@@ -29,12 +30,10 @@ class ExtractStage(PipelineStage):
 
         for block_name, block_cfg in (self.config.extract or {}).items():
             typer.echo(f"🔍 ExtractStage: processing block '{block_name}' (selector='{block_cfg.selector}')")
-            limit = getattr(block_cfg, "limit", None)
-            if limit is not None:
-                elements = soup.select(block_cfg.selector)[:limit]
-            else:
-                elements = soup.select(block_cfg.selector)
-            typer.echo(f"   ➤ Found {len(elements)} elements, limit={limit if limit is not None else 'None'}")
+            elements = soup.select(block_cfg.selector)
+            if block_cfg.limit:
+                elements = elements[:block_cfg.limit]
+            typer.echo(f"   ➤ Found {len(elements)} elements, limit={block_cfg.limit or 'None'}")
 
             items = []
             for el in elements:
@@ -42,22 +41,13 @@ class ExtractStage(PipelineStage):
 
                 for field_name, rule in block_cfg.fields.items():
                     try:
-                        # Case 1: shorthand "self"
                         if isinstance(rule, str) and rule == "self":
                             value = el.get_text(strip=True)
 
-                        # Case 2: full ExtractFieldConfig
                         elif isinstance(rule, ExtractFieldConfig):
-                            # Step 1: get raw value
-                            if parser_type == "xml" and rule.attr:
-                                target = el.find(rule.attr)
-                                raw = target.text.strip() if target else ""
-                            else:
-                                raw = el.get(rule.attr, "").strip()
-
+                            raw = el.get(rule.attr, "").strip()
                             value = raw
 
-                            # Step 2: apply Jinja2 transform
                             if rule.transform:
                                 typer.echo(f"   🧪 Jinja2 transform on '{field_name}'")
                                 value = self.render_transform(rule.transform, raw)
@@ -68,31 +58,33 @@ class ExtractStage(PipelineStage):
                                 value = fn(raw, template_name=self.config.template_name, base_url=base_url)
 
                         else:
-                            typer.echo(f"⚠️  Unsupported rule type for field '{field_name}'")
+                            typer.echo(f"⚠️ Unsupported rule type for field '{field_name}'")
                             value = ""
 
                         record[field_name] = value
-                        
-
-                        if "url" in record:
-                            full_url = urljoin(base_url, record["url"])
-                            record["url_final"] = full_url
-                        else:
-                            full_url = None
-
-                        if "url" in record and is_known_by_hash(record):
-                            typer.echo(f"⏭️  Пропущено: URL уже в базе → {record['url_final']}")
-                            continue  # 👈 не сохраняем, если уже было
 
                     except Exception as e:
                         typer.echo(f"❌ Error extracting field '{field_name}': {e}")
                         record[field_name] = ""
 
-                typer.echo(f"   📄 Record: {record}")
-                record["event_id"] = get_event_hash(record)
-                items.append(record)
+                # ⛓️ Обогащение и фильтрация после извлечения всех полей
+                full_url = urljoin(base_url, record.get("url", ""))
+                record["url_final"] = full_url
 
-            typer.echo(f"   ✔ Collected {len(items)} records for '{block_name}'")
+                if not record.get("title"):
+                    typer.echo(f"⏭️ Пропуск записи без title → {full_url}")
+                    continue
+
+
+                if full_url in seen_urls:
+                    typer.echo(f"⏭️ Повторный URL в HTML → {full_url}")
+                    continue
+
+                seen_urls.add(full_url)
+                items.append(record)
+                typer.echo(f"   📄 Record: {record}")
+
+            typer.echo(f"📦 Уникальных новых записей: {len(items)}")
             result[block_name] = items
 
         return result

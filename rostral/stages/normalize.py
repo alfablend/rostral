@@ -1,6 +1,6 @@
 from .base import PipelineStage
 import typer
-from ast import literal_eval
+import re
 
 class NormalizeStage(PipelineStage):
 
@@ -82,11 +82,17 @@ class NormalizeStage(PipelineStage):
         return True
 
     def _safe_eval(self, condition: str, context: dict) -> bool:
-        """Безопасное выполнение условий"""
+        """
+        Интерпретирует condition как регулярку и ищет её в item['text']
+        """
         try:
-            return bool(literal_eval(condition, context))
+            item = context["item"]
+            text = item.get("text", "")
+            if not isinstance(text, str):
+                return False
+            return re.search(condition, text, flags=re.IGNORECASE) is not None
         except Exception as e:
-            typer.echo(f"⚠️ Ошибка в условии '{condition}': {e}")
+            typer.echo(f"⚠️ Ошибка в регулярке '{condition}': {e}")
             return False
 
     def _sample_item(self, item):

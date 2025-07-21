@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import sessionmaker
 from models import Base, Event 
 from datetime import datetime, timezone
@@ -26,7 +26,11 @@ def is_known_by_hash(record: dict) -> bool:
     session.close()
     return exists is not None
 
-
+def is_known_by_url(url: str) -> bool:
+    session = Session()  # ← добавить эту строку
+    result = session.query(exists().where(Event.url == url)).scalar()
+    session.close()
+    return result
 
 def save_event(record: dict):
     session = Session()

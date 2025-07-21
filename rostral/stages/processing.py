@@ -8,43 +8,35 @@ from datetime import datetime
 from typing import Dict, Any, List
 import typer
 from .base import PipelineStage
+from rostral.db import get_event_hash, is_known_by_hash
 
-# Чтение лимитов из переменных окружения
 MAX_FRAGMENT_LENGTH = int(os.getenv("GPT_FRAGMENT_MAX_LENGTH", 200))
 TEXT_MAX_LENGTH = int(os.getenv("GPT_TEXT_MAX_LENGTH", 2000))
 CHUNK_HEAD = int(os.getenv("GPT_CHUNK_HEAD", TEXT_MAX_LENGTH // 2))
 CHUNK_TAIL = int(os.getenv("GPT_CHUNK_TAIL", TEXT_MAX_LENGTH // 2))
 
-# Утилита извлечения ключевых фрагментов из текста
-def extract_text_fragments(text: str, keywords: List[str], max_fragment_length=MAX_FRAGMENT_LENGTH, total_max_length=TEXT_MAX_LENGTH) -> str:
+def extract_text_fragments(text: str, keywords: List[str],
+                           max_fragment_length=MAX_FRAGMENT_LENGTH,
+                           total_max_length=TEXT_MAX_LENGTH) -> str:
     fragments = []
-    pattern = r'(?:' + '|'.join(
-        r'\b' + re.escape(k.lower()) + r'\w*\b' for k in keywords
-    ) + r')'
+    lower_text = text.lower()
+    
+    for kw in keywords:
+        idx = lower_text.find(kw.lower())
+        if idx == -1:
+            continue
 
-    for match in re.finditer(pattern, text, flags=re.IGNORECASE):
-        start = match.start()
-        end = text.find('.', start)
-        end = end + 1 if end != -1 else len(text)
+        start = max(0, idx - max_fragment_length // 2)
+        end = min(len(text), idx + max_fragment_length // 2)
+
         fragment = text[start:end].strip()
-        if len(fragment) > max_fragment_length:
-            fragment = fragment[:max_fragment_length] + '...'
         fragments.append(fragment)
 
-    excerpt = ' '.join(fragments)
-    return excerpt[:CHUNK_HEAD] + ' ... ' + excerpt[-CHUNK_TAIL:] if len(excerpt) > total_max_length else excerpt
+    excerpt = " ".join(fragments)
+    return excerpt[:CHUNK_HEAD] + " ... " + excerpt[-CHUNK_TAIL:] if len(excerpt) > total_max_length else excerpt
 
-# Основной класс
 class ProcessingStage(PipelineStage):
-    """
-    Универсальный обработчик PDF-файлов:
-    - Извлекает текст из PDF
-    - Генерирует excerpt по ключевым словам
-    - Готовит gpt_text
-    """
-
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        
         processing_meta = {
             "timestamp": datetime.now().isoformat(),
             "processed_files": 0,
@@ -64,32 +56,34 @@ class ProcessingStage(PipelineStage):
                 continue
 
             typer.echo(f"🔧 Processing block '{block_name}' with {len(items)} items")
-
-            for record in items:
-                if not isinstance(record, dict):
-                    continue
-
-                self._process_record(record, processing_meta)
+            data[block_name] = [r for r in items if self._process_record(r, processing_meta)]
 
         data["__processing__"] = processing_meta
         typer.echo(f"✅ Processed {processing_meta['processed_files']} PDF files")
 
         if "events" in data:
-            for i, event in enumerate(data.get("events", [])):
+            for i, event in enumerate(data["events"]):
                 typer.echo(f"📄 Документ #{i+1}: {event.get('title', 'Без названия')}")
+                
         else:
             typer.echo("❌ 'events' отсутствует")
 
         return data
 
-    def _process_record(self, record: Dict[str, Any], meta: Dict[str, Any]) -> None:
+    def _process_record(self, record: Dict[str, Any], meta: Dict[str, Any]) -> bool:
         if not record.get("file_content") or ".pdf" not in record.get("url", "").lower():
             typer.echo("❌ Файл не PDF, пропуск")
-            return
+            return False
 
         try:
             text = self._extract_pdf_text(record["file_content"])
             record["text"] = text
+            record["event_id"] = get_event_hash(record)
+
+            if is_known_by_hash(record):
+                typer.echo(f"⏭️ Пропуск: уже было → {record['url']}")
+                return False
+
             del record["file_content"]
             meta["processed_files"] += 1
             typer.echo(f"📝 Extracted text from PDF ({len(text)} chars)")
@@ -102,43 +96,40 @@ class ProcessingStage(PipelineStage):
                 "error": error_msg
             })
             typer.echo(f"❌ {error_msg}")
-            return
+            return False
 
-        # Ключевые слова из конфигурации
         keywords = getattr(self.config.processing, "extract_keywords", [])
         if keywords:
             excerpt = extract_text_fragments(text, keywords)
             record["excerpt"] = excerpt
-            typer.echo(f"🔍 excerpt by keywords → {len(excerpt)} chars")
-            
-            # Use excerpt as gpt_text if available
+            if not excerpt.strip():
+                typer.echo(f"⚠️ Ключевые слова не найдены в тексте → {record.get('url')}")
             record["gpt_text"] = excerpt
+            typer.echo(f"🔍 excerpt by keywords → {len(excerpt)} chars")
             typer.echo(f"✂️ gpt_text set to excerpt ({len(excerpt)} chars)")
         else:
-            # Fallback to original behavior if no keywords/excerpt
             if len(text) > TEXT_MAX_LENGTH:
                 record["gpt_text"] = f"{text[:CHUNK_HEAD]} ... {text[-CHUNK_TAIL:]}"
                 typer.echo(f"✂️ gpt_text trimmed from full text to {len(record['gpt_text'])} chars")
             else:
                 record["gpt_text"] = text
 
+        return True
+
     def _extract_pdf_text(self, pdf_content: bytes, max_pages: int = 10) -> str:
         text_parts = []
         doc = fitz.open(stream=BytesIO(pdf_content), filetype="pdf")
-
         for page_num in range(min(len(doc), max_pages)):
             page = doc.load_page(page_num)
             text = self._extract_page_text(page)
             if text:
                 text_parts.append(text)
-
         return "\n".join(text_parts).strip()
 
     def _extract_page_text(self, page) -> str:
         text = page.get_text().strip()
         if text:
             return text
-
         try:
             pix = page.get_pixmap(dpi=300)
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)

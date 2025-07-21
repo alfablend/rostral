@@ -24,7 +24,7 @@ extract:
   events:
     selector: "a[href*='/media/uploads/userfiles/'], a[href*='disk.yandex.ru']"
     type: list
-    limit: 2
+    limit: 10
     fields:
       title: "self"
       url:
