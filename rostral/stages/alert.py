@@ -1,8 +1,12 @@
+import os
 from colorama import Fore, Style
 from datetime import datetime
 from jinja2 import Template
 from typing import Dict, Any
 from .base import PipelineStage
+from rostral.db import is_known_by_hash, save_event
+
+MAX_EVENTS_PER_TEMPLATE = int(os.getenv("MAX_EVENTS_PER_TEMPLATE", 10))
 
 class AlertStage(PipelineStage):
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -11,6 +15,7 @@ class AlertStage(PipelineStage):
         if not hasattr(self.config, 'alert'):
             print(f"{Fore.RED}⚠️ Конфигурация алертов отсутствует{Style.RESET_ALL}")
             return {"alert": {"error": "No alert config"}}
+
 
         # Объединяем GPT-ответы с основными данными
         if 'gpt_responses' in data:
@@ -22,6 +27,7 @@ class AlertStage(PipelineStage):
                             item['gpt'] = data['gpt_responses'].get(doc_id, {})
 
         # Рендерим алерты
+        print(f"🔍 Количество событий в AlertStage: {len(data.get('events', []))}")
         rendered_alerts = {}
         for template_name, template_str in self.config.alert.templates.items():
             try:
@@ -42,6 +48,19 @@ class AlertStage(PipelineStage):
                 print(f"{Fore.RED}❌ {error_msg}{Style.RESET_ALL}")
 
         print(f"{Fore.GREEN}✅ AlertStage завершен{Style.RESET_ALL}")
+        
+        if "events" in data and isinstance(data["events"], list):
+            events_to_save = data["events"][:MAX_EVENTS_PER_TEMPLATE]
+            for record in events_to_save:
+                if is_known_by_hash(record):
+                    record["status"] = "skipped"
+                    continue
+                if isinstance(record, dict) and "url" in record:
+                    # Переносим сохранение после обработки GPT
+                    if 'gpt' in record:  # Убедимся, что GPT обработка завершена
+                        record['gpt_text'] = record['gpt'].get('summary', '')  # Или другое поле из GPT ответа
+                    save_event(record, config=self.config)
+                    print(f"{Fore.BLUE}💾 Событие сохранено: {record['url']}{Style.RESET_ALL}")
         return {"alert": rendered_alerts}
 
     def _print_alert(self, content: str, alert_name: str):
@@ -56,6 +75,7 @@ class AlertStage(PipelineStage):
                     print(f"{Fore.YELLOW}{line}{Style.RESET_ALL}")
                 elif any(line.lstrip().startswith(x) for x in ['-', '•', '*']):
                     print(f"  {Fore.GREEN}{line.lstrip()}{Style.RESET_ALL}")
+                    print(f"{Fore.MAGENTA}Событие есть в базе, сохранение пропущено{Style.RESET_ALL}")
                 elif ':' in line:
                     key, val = line.split(':', 1)
                     print(f"{Fore.MAGENTA}{key}:{Style.RESET_ALL}{val}")

@@ -3,9 +3,12 @@ import time
 import typer
 from urllib.parse import urlparse
 from typing import Optional, Dict, Any
+from tqdm import tqdm
 from .base import PipelineStage
 from rostral.models import DownloadConfig
 from rostral.stages.transforms import transform_smart_url
+from rostral.db import is_known_by_hash, get_event_hash
+from rostral.db import is_known_by_url 
 
 class DownloadStage(PipelineStage):
     def __init__(self, *args, **kwargs):
@@ -58,7 +61,7 @@ class DownloadStage(PipelineStage):
 
     def _process_record(self, record: Dict[str, Any], verify_ssl: bool) -> bool:
         """Обрабатывает одну запись"""
-        url = record.get("url")
+        url = record.get("url_final") or record.get("url")
         if not url:
             return False
 
@@ -99,21 +102,41 @@ class DownloadStage(PipelineStage):
             return data
 
         verify_ssl = getattr(self.config.source.fetch, "verify_ssl", True)
-        stats = {"total": 0, "success": 0, "failed": 0}
+        stats = {"total": 0, "success": 0, "skipped": 0, "failed": 0}
 
         for block_name, items in data.items():
             if not isinstance(items, list):
                 continue
 
             stats["total"] += len(items)
-            for record in items:
+            processed_items = []
+
+            for record in tqdm(items, desc=f"📥 Downloading [{block_name}]", unit="file"):
                 if not isinstance(record, dict):
                     continue
 
+                url = record.get("url_final") or record.get("url")
+                if not url:
+                    typer.echo("⚠️ Запись без URL — пропущена")
+                    stats["skipped"] += 1
+                    continue
+
+                # ✅ Проверка по URL: если файл уже загружен — не качаем
+                if is_known_by_url(url):
+                    typer.echo(f"⏭️ Пропущено: файл уже загружался → {url}")
+                    record["download_status"] = "skipped"
+                    stats["skipped"] += 1
+                    continue
+
+                # 📦 Пытаемся загрузить
                 if self._process_record(record, verify_ssl):
                     stats["success"] += 1
                 else:
                     stats["failed"] += 1
 
-        typer.echo(f"\n📊 Итоги загрузки: {stats['success']}/{stats['total']} успешно, {stats['failed']} ошибок")
+                processed_items.append(record)
+
+            data[block_name] = processed_items
+
+        typer.echo(f"\n📊 Итоги загрузки: загружено={stats['success']}, пропущено={stats['skipped']}, ошибки={stats['failed']}, всего={stats['total']}")
         return data

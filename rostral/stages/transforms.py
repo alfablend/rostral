@@ -52,9 +52,10 @@ def transform_yandex_disk(url: str) -> str:
         
         download_url = response.json().get("href", "")
         
+        time.sleep(1)
+
         return download_url if download_url else url
     
-        time.sleep(1)
             
     except Exception as e:
         print(f"⚠️ Ошибка преобразования ссылки Яндекс.Диска {url}: {str(e)}")
