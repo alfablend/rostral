@@ -10,7 +10,7 @@ class NormalizeStage(PipelineStage):
         if not extracted or not hasattr(self.config, 'normalize') or not self.config.normalize.rules:
             typer.echo("ℹ️ No normalize rules defined, skipping normalization")
             return {"events": extracted.get("events", [])}
-
+        
         normalized = {}
         meta = {"filter_stats": {}}
 
@@ -76,6 +76,9 @@ class NormalizeStage(PipelineStage):
         
         # Condition filter
         if hasattr(filter_rule, 'condition') and filter_rule.condition:
+        
+            typer.echo(f"Testing condition: '{filter_rule.condition}'")
+            typer.echo(f"Against text: '{item.get('text', '')[0:200]}...'")    
             if not self._safe_eval(filter_rule.condition, {"item": item}):
                 return False
 
@@ -88,9 +91,10 @@ class NormalizeStage(PipelineStage):
         try:
             item = context["item"]
             text = item.get("text", "")
-            if not isinstance(text, str):
+            if text == "":        
+                typer.echo(f"⚠️ Текст пуст! Доступные поля: {list(item.keys())}")
                 return False
-            return re.search(condition, text, flags=re.IGNORECASE) is not None
+            return re.search(condition, text, flags=re.IGNORECASE | re.DOTALL) is not None
         except Exception as e:
             typer.echo(f"⚠️ Ошибка в регулярке '{condition}': {e}")
             return False
