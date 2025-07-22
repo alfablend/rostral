@@ -1,0 +1,9 @@
+<form method="post">
+  <label for="template">Выберите шаблон:</label>
+  <select name="template" id="template" class="form-select">
+    {% for tpl in templates %}
+      <option value="{{ tpl }}">{{ tpl }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Запустить</button>
+</form>

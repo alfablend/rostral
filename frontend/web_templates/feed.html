@@ -1,0 +1,16 @@
+{% for event in events %}
+<div class="card mb-3">
+  <div class="card-header">{{ event.title }}</div>
+  <div class="card-body">
+    <p>{{ event.excerpt or event.text[:200] }}</p>
+    <details>
+      <summary>Показать полный текст</summary>
+      <pre>{{ event.text }}</pre>
+    </details>
+    {% if event.gpt_text %}
+    <div><strong>GPT-анализ:</strong><pre>{{ event.gpt_text }}</pre></div>
+    {% endif %}
+    <small class="text-muted">Источник: {{ event.url }}</small>
+  </div>
+</div>
+{% endfor %}
