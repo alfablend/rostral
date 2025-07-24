@@ -15,36 +15,65 @@ TEXT_MAX_LENGTH = int(os.getenv("GPT_TEXT_MAX_LENGTH", 2000))
 CHUNK_HEAD = int(os.getenv("GPT_CHUNK_HEAD", TEXT_MAX_LENGTH // 2))
 CHUNK_TAIL = int(os.getenv("GPT_CHUNK_TAIL", TEXT_MAX_LENGTH // 2))
 
-def extract_text_fragments(text: str, keywords: List[str],
-                         max_fragment_length=MAX_FRAGMENT_LENGTH,
-                         total_max_length=TEXT_MAX_LENGTH) -> str:
-    if not text or not keywords:
-        return text[:total_max_length] if text else ""
+import re
+from typing import List, Dict, Any
+
+def extract_text_fragments(text: str, regex_patterns: List[str]) -> str:
+    """
+    Улучшенная версия с подробным логированием работы regex
+    """
+    print("✅ Функция extract_text_fragments вызвана")
+    print(f"📝 Длина текста: {len(text)} символов")
+    print(f"🔎 Паттерны: {regex_patterns}")
+    if not text:
+        return "⚠ Текст для анализа отсутствует"
     
+    if not regex_patterns:
+        return "⚠ Не заданы regex-паттерны для поиска"
+
     fragments = []
-    lower_text = text.lower()
-    lower_keywords = [kw.lower() for kw in keywords]
+    debug_info = []  # Для отладочной информации
     
-    for kw in lower_keywords:
-        idx = lower_text.find(kw)
-        if idx == -1:
+    for pattern in regex_patterns:
+        try:
+            debug_info.append(f"\n🔍 Анализ паттерна: '{pattern}'")
+            matches = list(re.finditer(pattern, text, re.DOTALL | re.IGNORECASE))
+            
+            if not matches:
+                debug_info.append("   ➤ Совпадений не найдено")
+                continue
+                
+            debug_info.append(f"   ➤ Найдено совпадений: {len(matches)}")
+            
+            for i, match in enumerate(matches, 1):
+                start = match.end()
+                end = min(len(text), start + 200)
+                fragment = text[start:end].strip()
+                
+                debug_info.append(f"\n   🔹 Совпадение #{i}:")
+                debug_info.append(f"      Позиция: {match.start()}-{match.end()}")
+                debug_info.append(f"      Совпавший текст: '{match.group()}'")
+                debug_info.append(f"      Контекст (200 символов после):\n      '{fragment}'")
+                
+                if fragment:
+                    label = {
+                        r'УТВЕРЖДАЮ': '🔹 Утверждающая организация',
+                        r'адрес[у]?:': '📍 Адрес объекта', 
+                        r'проектом': '📋 Детали проекта',
+                        r'собственником': '👤 Собственник',
+                        r'Краткие исторические': '📜 Историческая справка'
+                    }.get(pattern, f'⚙️ Найдено по паттерну "{pattern}"')
+                    
+                    fragments.append(f"{label}:\n{fragment}\n{'━'*40}")
+
+        except re.error as e:
+            debug_info.append(f"   ❌ Ошибка в паттерне: {str(e)}")
             continue
 
-        start = max(0, idx - max_fragment_length // 2)
-        end = min(len(text), idx + len(kw) + max_fragment_length // 2)
-
-        fragment = text[start:end].strip()
-        if fragment not in fragments:  # Избегаем дубликатов
-            fragments.append(fragment)
-
-    if not fragments:
-        return text[:total_max_length] if text else ""
-        
-    excerpt = " [...] ".join(fragments)
-    if len(excerpt) > total_max_length:
-        return excerpt[:CHUNK_HEAD] + " [...] " + excerpt[-CHUNK_TAIL:]
-    return excerpt
-
+    # Вывод отладочной информации в консоль
+    print("\n".join(debug_info))
+    
+    return "\n\n".join(fragments) if fragments else "Не найдено значимых фрагментов"
 class ProcessingStage(PipelineStage):
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
         processing_meta = {
@@ -108,16 +137,16 @@ class ProcessingStage(PipelineStage):
             typer.echo(f"❌ {error_msg}")
             return False
 
-        keywords = getattr(self.config.processing, "extract_keywords", [])
-    
-        if keywords:
-            excerpt = extract_text_fragments(text, keywords)
-
+        regex_patterns = getattr(self.config.processing, "extract_regex", [])
+        print ('ПАТТЕРНЫ', len(regex_patterns), regex_patterns)
+        if regex_patterns:
+            excerpt = extract_text_fragments(text, regex_patterns)
+            print(f"⚙️ Используемые regex-паттерны: {regex_patterns}")
             record["excerpt"] = excerpt
             if not excerpt.strip():
                 typer.echo(f"⚠️ Ключевые слова не найдены в тексте → {record.get('url')}")
             record["gpt_text"] = excerpt
-            typer.echo(f"🔍 excerpt by keywords → {len(excerpt)} chars")
+            typer.echo(f"🔍 excerpt by regex_patterns → {len(excerpt)} chars")
             typer.echo(f"✂️ gpt_text set to excerpt ({len(excerpt)} chars)")
         else:
             if len(text) > TEXT_MAX_LENGTH:

@@ -59,7 +59,7 @@ class NormalizeConfig(BaseModel):
 
 
 class ProcessingConfig(BaseModel):  
-    extract_keywords: List[str] = []
+    extract_regex: List[str] = []
 
 
 class GPTConfig(BaseModel):

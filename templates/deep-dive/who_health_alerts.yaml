@@ -46,18 +46,18 @@ normalize:
         - filter: "documents"
           condition: "'WHO' in item.page_text or 'World Health Organization' in item.page_text"
 
-gpt:
-  prompt: |
-    You are processing a health alert from WHO.
-    Summarize the key content of the alert based on the input text, which may come from either a PDF or the webpage itself.
-    Focus on:
-    - Type of outbreak or event
-    - Region(s) and country affected
-    - Severity: confirmed cases, deaths, urgency
-    - Any recommended actions or measures
-    Output 2–3 concise sentences in neutral tone.
-
-    This is the text: {{ text }}
+#gpt:
+#  prompt: |
+#    You are processing a health alert from WHO.
+#    Summarize the key content of the alert based on the input text, which may come from either a PDF or the webpage itself.
+#    Focus on:
+#    - Type of outbreak or event
+#    - Region(s) and country affected
+#    - Severity: confirmed cases, deaths, urgency
+#    - Any recommended actions or measures
+#    Output 2–3 concise sentences in neutral tone.
+#
+#    This is the text: {{ text }}
 
 alert:
   templates:
