@@ -16,35 +16,39 @@ source:
   url: https://www.who.int/rss-feeds/news-english.xml
   frequency: hourly  
   fetch:
-    ttl: 24h
     headers:
       User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
     retry_policy:  
       max_retries: 3
       backoff_factor: 2
+
 extract:
   events:
     selector: "item"
-    type: list
+    type: "list"
     limit: 5
-    fields: 
-      title: 
-          attr: "title"
+    fields:
+      title:
+        attr: "title"
       url:
-          attr: "link"
+        attr: "link"
+      description:
+        attr: "description"
+      pubDate:
+        attr: "pubDate"
 
 download:
   extensions: ['.pdf', '.docx']
   timeout: 20
   allow_html: true
 
-  
 normalize:
   rules:
-    - field: events
+    - field: "events"
       filters:
         - filter: "documents"
-          condition: "'WHO' in item.page_text or 'World Health Organization' in item.page_text"
+          condition: "(WHO)"
+
 
 #gpt:
 #  prompt: |
@@ -59,26 +63,22 @@ normalize:
 #
 #    This is the text: {{ text }}
 
+
 alert:
   templates:
     who: |
       {% for event in events %}
-        = WHO doc {{ loop.index }} =
-        📌 Name: {{ event.title }}
+        = WHO Alert {{ loop.index }} =
+        📌 Title: {{ event.title }}
         🔗 URL: {{ event.url }}
+        📅 Date: {{ event.pubDate }}
         
         {% if event.gpt %}
-        💬 GPT summary:
+        💬 Summary:
         {{ event.gpt | trim }}
-        {% else %}
-        ⚠️ GPT summary not available.
         {% endif %}
         
-        {% if event.date %}
+        {% if not loop.last %}
+        ───────
         {% endif %}
-        
-        {% if not loop.last %}\n───────\n{% endif %}
       {% endfor %}
-
-  test_event:
-    url: https://www.who.int/emergencies/disease-outbreak-news/item/2023-DON442
