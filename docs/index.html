@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <link rel="icon" href="https://rostral.io/static/favicon.ico">
-  <title>Rostral.io — Deep Document Monitoring & Multilingual Intelligence</title>
+  <title>Rostral.io — Semantic monitoring made simple</title>
   <style>
     :root {
       --base-font-size: 18px;
@@ -117,43 +117,33 @@
       font-weight: 600;
     }
     
-    .dual-aspect-section {
-      display: flex;
-      gap: 2em;
-      margin: 3em 0;
-    }
-    
-    .aspect-card {
-      flex: 1;
-      background-color: white;
-      padding: 2em;
+    .language-section {
+      background-color: #f8f9fa;
+      padding: 3em 2em;
+      margin: 2em 0;
       border-radius: 0.625em;
-      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 2em;
     }
     
-    .aspect-card:hover {
-      transform: translateY(-0.1875em);
-      box-shadow: 0 0.375em 1em rgba(0,0,0,0.15);
-    }
-    
-    .aspect-icon {
+    .language-icon {
       font-size: 3em;
       color: #D9AB35;
-      margin-bottom: 0.5em;
+      flex-shrink: 0;
     }
     
-    .aspect-title {
+    .language-content h3 {
       font-size: 1.8em;
-      font-weight: 600;
+      margin: 0 0 0.5em 0;
       color: #222;
-      margin-bottom: 0.5em;
     }
     
-    .aspect-desc {
+    .language-content p {
+      margin: 0;
       color: #444;
-      line-height: 1.7;
-      font-size: 1.1em;
+      font-size: 1.2em;
+      line-height: 1.6;
     }
     
     .features {
@@ -279,12 +269,18 @@
         font-size: 1.3em;
       }
       
-      .dual-aspect-section {
+      .features {
         flex-direction: column;
       }
       
-      .features {
+      .language-section {
         flex-direction: column;
+        text-align: center;
+        padding: 2em 1em;
+      }
+      
+      .language-icon {
+        margin-bottom: 1em;
       }
     }
   </style>
@@ -297,7 +293,7 @@
         <img src="https://rostral.io/static/rostral_logo.png" alt="Rostral.io" class="logo-img">
         <div>
           <div class="logo-text">rostral.io</div>
-          <div class="logo-tagline">Deep Document Monitoring & Multilingual Intelligence</div>
+          <div class="logo-tagline">All you need in one feed</div>
         </div>
       </div>
       
@@ -308,56 +304,47 @@
 
     <div class="hero">
       <h1 class="hero-title">Rostral.io</h1>
-      <h2 class="hero-subtitle">Semantic Monitoring Across Languages and Documents</h2>
+      <h2 class="hero-subtitle">Semantic monitoring made simple</h2>
       <p class="hero-tagline">
-        Advanced <span class="highlight">document analysis</span> meets <span class="highlight">multilingual intelligence</span>.
-        Extract meaningful insights from <span class="highlight">local files</span> and <span class="highlight">foreign sources</span>
-        with AI-powered semantic processing.
+        An open-source CLI that monitors <span class="highlight">RSS feeds</span>, <span class="highlight">HTML pages</span>, 
+        <span class="highlight">APIs</span>, and <span class="highlight">documents</span> — and extracts meaningful events 
+        with <span class="highlight">AI assistance</span>.
       </p>
     </div>
 
-    <div class="dual-aspect-section">
-      <div class="aspect-card">
-        <div class="aspect-icon">📄</div>
-        <h3 class="aspect-title">Deep Document Analysis</h3>
-        <p class="aspect-desc">
-          Rostral.io provides comprehensive monitoring of documents, reports, and local files with semantic understanding.
-          Our system extracts key information, tracks changes, and reveals hidden patterns in complex documents.
-        </p>
-      </div>
-      
-      <div class="aspect-card">
-        <div class="aspect-icon">🌍</div>
-        <h3 class="aspect-title">Multilingual Intelligence</h3>
-        <p class="aspect-desc">
-          Monitor and analyze content in any language. Rostral.io automatically translates and processes foreign news,
-          documents, and reports while preserving semantic meaning and context across languages.
+    <div class="language-section">
+      <div class="language-icon">🌐</div>
+      <div class="language-content">
+        <h3>Multilingual Content Monitoring</h3>
+        <p>
+          Rostral.io specializes in tracking and translating foreign content: news, documents, and reports. 
+          Our AI extracts the essence regardless of the original language, delivering insights in your preferred language.
         </p>
       </div>
     </div>
 
     <div class="features">
       <div class="feature-card">
-        <div class="feature-icon">🔍</div>
-        <h3 class="feature-title">Semantic Processing</h3>
-        <p class="feature-desc">
-          Advanced NLP extracts concepts and relationships rather than just keywords, for both documents and multilingual content.
-        </p>
-      </div>
-      
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3 class="feature-title">Unified Knowledge Base</h3>
-        <p class="feature-desc">
-          All monitored content — whether local documents or foreign sources — integrates into a single searchable repository.
-        </p>
-      </div>
-      
-      <div class="feature-card">
         <div class="feature-icon">⚙️</div>
         <h3 class="feature-title">Template-Driven</h3>
         <p class="feature-desc">
-          Configure monitoring for both document directories and foreign sources using simple YAML templates.
+          Define monitoring templates in simple YAML. Launch them via interactive CLI menu or automated scripts.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🌍</div>
+        <h3 class="feature-title">Language-Agnostic</h3>
+        <p class="feature-desc">
+          Monitor content in any language with automatic translation and semantic analysis that preserves key context.
+        </p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3 class="feature-title">AI-Powered Analysis</h3>
+        <p class="feature-desc">
+          GPT-assisted semantic analysis to surface meaningful events from raw data feeds in any supported language.
         </p>
       </div>
     </div>
@@ -371,25 +358,25 @@
         </a>
         
         <a href="https://github.com/alfablend/rostral.io/blob/main/TECHNICALSPEC.md" class="link-card" target="_blank">
-          <div class="link-title">Technical Specs</div>
-          <div class="link-desc">Deep dive into architecture</div>
+          <div class="link-title">Specification</div>
+          <div class="link-desc">Technical details and architecture</div>
         </a>
         
         <a href="https://github.com/alfablend/rostral.io/tree/main/templates" class="link-card" target="_blank">
-          <div class="link-title">Template Examples</div>
-          <div class="link-desc">For documents and multilingual</div>
+          <div class="link-title">Templates</div>
+          <div class="link-desc">Collection of monitoring templates</div>
         </a>
         
-        <a href="https://github.com/alfablend/rostral.io/issues/new" class="link-card" target="_blank">
-          <div class="link-title">Report Issues</div>
-          <div class="link-desc">GitHub Issues tracker</div>
+        <a href="https://github.com/alfablend/rostral.io/blob/main/LICENSE" class="link-card" target="_blank">
+          <div class="link-title">License</div>
+          <div class="link-desc">MIT License terms</div>
         </a>
       </div>
     </div>
 
     <div class="footer">
-      <div class="footer-tagline">From local documents to global sources — one intelligent feed</div>
-      <p>© 2023 Rostral.io — Advanced Semantic Monitoring System</p>
+      <div class="footer-tagline">All you need in one feed — powered by AI and YAML</div>
+      <p>© 2023 Rostral.io — Open Source Intelligence Monitoring</p>
     </div>
   </div>
 

@@ -9,6 +9,8 @@ from typing import Dict, Any, Optional
 from dotenv import load_dotenv
 load_dotenv()
 
+TEXT_MAX_LENGTH = os.getenv("TEXT_MAX_LENGTH")
+
 try:
     from gpt4all import GPT4All
     gpt4all_model_path = str(Path(os.getenv("GPT4ALL_MODEL_PATH")).absolute())
@@ -84,22 +86,15 @@ class GPTStage(PipelineStage):
             "gpt_responses": gpt_responses
         }
 
-    def _process_single_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
-        """Обрабатывает один документ и возвращает результат"""
-        text = self._get_single_text(item)
-        if not text:
-            return {"error": "Empty input text"}
-
-        prompt = self._render_prompt(text, item)
-        response = self._get_gpt_response(prompt)
-        
-        return self._parse_response(self._clean_model_output(response))
 
     def _get_single_text(self, item: Dict[str, Any]) -> str:
         """Получает текст для одного документа"""
-        for field in ["gpt_text", "excerpt", "text"]:
+        for field in ["excerpt", "text"]:
             text = item.get(field)
             if text and isinstance(text, str) and text.strip():
+                if len (text) > int(TEXT_MAX_LENGTH):
+                    text = text [:int(TEXT_MAX_LENGTH)]
+                    print ("Text trimmered on GPT stage")
                 return text.strip()
         return ""    
     

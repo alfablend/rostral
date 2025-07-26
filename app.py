@@ -46,7 +46,7 @@ def monitor():
     return jsonify(result)
 
 
-@app.route('/feed')
+@app.route('/')
 def feed():
     session = Session()
     events = session.query(Event).order_by(Event.timestamp.desc()).limit(50).all()
@@ -69,7 +69,7 @@ def run_template():
     except Exception as e:
         print(f"❌ Ошибка запуска: {e}")
 
-    return redirect("/feed")
+    return redirect("/")
 
 
 if __name__ == '__main__':

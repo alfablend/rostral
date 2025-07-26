@@ -150,10 +150,10 @@ class ProcessingStage(PipelineStage):
             typer.echo(f"✂️ gpt_text set to excerpt ({len(excerpt)} chars)")
         else:
             if len(text) > TEXT_MAX_LENGTH:
-                record["gpt_text"] = f"{text[:CHUNK_HEAD]} ... {text[-CHUNK_TAIL:]}"
+                record["excerpt"] = f"{text[:CHUNK_HEAD]} ... {text[-CHUNK_TAIL:]}"
                 typer.echo(f"✂️ gpt_text trimmed from full text to {len(record['gpt_text'])} chars")
             else:
-                record["gpt_text"] = text
+                record["excerpt"] = text
 
         return True
 
