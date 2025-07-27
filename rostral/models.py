@@ -21,7 +21,7 @@ class FetchConfig(BaseModel):
     retry_policy: Dict[str, Any]
     timeout: int = 10
     verify_ssl: bool = True
-
+    selector: Optional[str] = None
 
 class SourceConfig(BaseModel):
     type: str
@@ -59,7 +59,7 @@ class NormalizeConfig(BaseModel):
 
 
 class ProcessingConfig(BaseModel):  
-    extract_keywords: List[str] = []
+    extract_regex: List[str] = []
 
 
 class GPTConfig(BaseModel):
@@ -104,7 +104,6 @@ def load_yaml_config(path: str) -> Config:
     return Config.model_validate(data)
 
 
-# SQLAlchemy models (unique from the second file)
 Base = declarative_base()
 
 class TransformCache(Base):

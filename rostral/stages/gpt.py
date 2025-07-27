@@ -9,6 +9,8 @@ from typing import Dict, Any, Optional
 from dotenv import load_dotenv
 load_dotenv()
 
+TEXT_MAX_LENGTH = os.getenv("TEXT_MAX_LENGTH")
+
 try:
     from gpt4all import GPT4All
     gpt4all_model_path = str(Path(os.getenv("GPT4ALL_MODEL_PATH")).absolute())
@@ -64,42 +66,25 @@ class GPTStage(PipelineStage):
                 # Генерируем промпт и получаем ответ
                 prompt = self._render_prompt(text, item)
                 response = self._get_gpt_response(prompt)
-                
-                # Парсим и сохраняем результат
-                parsed = self._parse_response(self._clean_model_output(response))
-                gpt_responses[doc_id] = {
-                    **parsed,
-                    "_meta": {
-                        "model": self._get_model_info(),
-                        "prompt_length": len(prompt),
-                        "response_length": len(response)
-                    }
-                }
-                
+                cleaned_text = self._clean_model_output(response)
                 # Также сохраняем результат в сам документ
-                item["gpt"] = gpt_responses[doc_id]
+                item["gpt_text"] = self._parse_response(cleaned_text)
+                print(f"📝 Ответ GPT для сохранения: {item['gpt_text'][:200]}... (длина: {len(item['gpt_text'])})")
         
         return {
             **data,
             "gpt_responses": gpt_responses
         }
 
-    def _process_single_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
-        """Обрабатывает один документ и возвращает результат"""
-        text = self._get_single_text(item)
-        if not text:
-            return {"error": "Empty input text"}
-
-        prompt = self._render_prompt(text, item)
-        response = self._get_gpt_response(prompt)
-        
-        return self._parse_response(self._clean_model_output(response))
 
     def _get_single_text(self, item: Dict[str, Any]) -> str:
         """Получает текст для одного документа"""
-        for field in ["gpt_text", "excerpt", "text"]:
+        for field in ["excerpt", "text"]:
             text = item.get(field)
             if text and isinstance(text, str) and text.strip():
+                if len (text) > int(TEXT_MAX_LENGTH):
+                    text = text [:int(TEXT_MAX_LENGTH)]
+                    print ("Text trimmered on GPT stage")
                 return text.strip()
         return ""    
     
@@ -197,32 +182,14 @@ class GPTStage(PipelineStage):
         
         return text.strip()
 
-    def _parse_response(self, text: str) -> Dict[str, str]:
-        """Строгий парсинг ответа по формату ключ: значение"""
-        result = {}
-        current_key = None
+    def _parse_response(self, text: str) -> str:  # Возвращает str, а не Dict!
+        """Очищает ответ GPT и возвращает как строку (без ключей)."""
+        if not text:
+            return ""
         
-        for line in text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-                
-            # Обрабатываем строки с разделителем ":"
-            if ":" in line:
-                if current_key:  # Сохраняем предыдущее значение
-                    result[current_key] = result[current_key].strip()
-                
-                key, val = line.split(":", 1)
-                current_key = key.strip().lower().replace(" ", "_")
-                result[current_key] = val.strip()
-            elif current_key:  # Продолжение предыдущего значения
-                result[current_key] += " " + line
-                
-        # Удаляем технические артефакты из значений
-        for key in result:
-            result[key] = re.sub(r'\[\d+\]', '', result[key])
-            
-        return result
+        # Удаляем технические артефакты (например, [1], [2])
+        cleaned_text = re.sub(r'\[\d+\]', '', text.strip())
+        return cleaned_text
 
     def _get_text(self, data: Dict[str, Any]) -> Dict[str, str]:
         """Возвращает словарь {doc_id: text} для всех документов"""
@@ -234,7 +201,6 @@ class GPTStage(PipelineStage):
                 
             for i, item in enumerate(items):
                 sources = [
-                    item.get("gpt_text"),
                     item.get("excerpt"),
                     item.get("text")
                 ]
@@ -254,7 +220,6 @@ class GPTStage(PipelineStage):
     def _detect_text_source(self, data: Dict[str, Any], text: str) -> str:
         """Определяет источник текста для метаданных"""
         sources = {
-            "gpt_text": data.get("gpt_text"),
             "excerpt": data.get("excerpt"),
             "text": data.get("text")
         }

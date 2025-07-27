@@ -56,9 +56,6 @@ class AlertStage(PipelineStage):
                     record["status"] = "skipped"
                     continue
                 if isinstance(record, dict) and "url" in record:
-                    # Переносим сохранение после обработки GPT
-                    if 'gpt' in record:  # Убедимся, что GPT обработка завершена
-                        record['gpt_text'] = record['gpt'].get('summary', '')  # Или другое поле из GPT ответа
                     save_event(record, config=self.config)
                     print(f"{Fore.BLUE}💾 Событие сохранено: {record['url']}{Style.RESET_ALL}")
         return {"alert": rendered_alerts}
