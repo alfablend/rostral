@@ -26,7 +26,15 @@ class EventHTMLStage(PipelineStage):
                     response.raise_for_status()
 
                     soup = BeautifulSoup(response.text, "html.parser")
-                    text = soup.get_text(separator="\n", strip=True)
+                
+                    selector = getattr(self.config.source.fetch, "selector", None)
+
+                    if selector:
+                        selected = soup.select(selector)
+                        text = "\n".join([el.get_text(strip=True) for el in selected])
+                    else:
+                        text = soup.get_text(separator="\n", strip=True)
+
 
                     if text and len(text) > 50:
                         record["page_text"] = text

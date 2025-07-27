@@ -145,13 +145,13 @@ class ProcessingStage(PipelineStage):
             record["excerpt"] = excerpt
             if not excerpt.strip():
                 typer.echo(f"⚠️ Ключевые слова не найдены в тексте → {record.get('url')}")
-            record["gpt_text"] = excerpt
+            
             typer.echo(f"🔍 excerpt by regex_patterns → {len(excerpt)} chars")
-            typer.echo(f"✂️ gpt_text set to excerpt ({len(excerpt)} chars)")
+            
         else:
             if len(text) > TEXT_MAX_LENGTH:
                 record["excerpt"] = f"{text[:CHUNK_HEAD]} ... {text[-CHUNK_TAIL:]}"
-                typer.echo(f"✂️ gpt_text trimmed from full text to {len(record['gpt_text'])} chars")
+                typer.echo(f"✂️ gpt_text trimmed from full text to {len(record['excerpt'])} chars")
             else:
                 record["excerpt"] = text
 

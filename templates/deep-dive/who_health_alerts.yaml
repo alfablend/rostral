@@ -16,6 +16,7 @@ source:
   url: https://www.who.int/rss-feeds/news-english.xml
   frequency: hourly  
   fetch:
+    selector: 'article.sf-detail-body-wrapper'
     headers:
       User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
     retry_policy:  
@@ -26,7 +27,7 @@ extract:
   events:
     selector: "item"
     type: "list"
-    limit: 5
+    limit: 2
     fields:
       title:
         attr: "title"
@@ -50,18 +51,18 @@ normalize:
           condition: "(WHO)"
 
 
-#gpt:
-#  prompt: |
-#    You are processing a health alert from WHO.
-#    Summarize the key content of the alert based on the input text, which may come from either a PDF or the webpage itself.
-#    Focus on:
-#    - Type of outbreak or event
-#    - Region(s) and country affected
-#    - Severity: confirmed cases, deaths, urgency
-#    - Any recommended actions or measures
-#    Output 2–3 concise sentences in neutral tone.
-#
-#    This is the text: {{ text }}
+gpt:
+  prompt: |
+    You are processing a health alert from WHO.
+    Summarize the key content of the alert based on the input text, which may come from either a PDF or the webpage itself.
+    Focus on:
+    - Type of outbreak or event
+    - Region(s) and country affected
+    - Severity: confirmed cases, deaths, urgency
+    - Any recommended actions or measures
+    Output 2–3 concise sentences in neutral tone.
+
+    This is the text: {{ text }}
 
 
 alert:
@@ -73,9 +74,9 @@ alert:
         🔗 URL: {{ event.url }}
         📅 Date: {{ event.pubDate }}
         
-        {% if event.gpt %}
+        {% if event.gpt_text %}
         💬 Summary:
-        {{ event.gpt | trim }}
+        {{ event.gpt_text | trim }}
         {% endif %}
         
         {% if not loop.last %}
