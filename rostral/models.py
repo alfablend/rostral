@@ -117,7 +117,7 @@ class TransformCache(Base):
 
 timestamp = datetime.now(timezone.utc)
 class Event(Base):
-    __tablename__ = "events"
+    __tablename__ = 'events'
     
     id = Column(Integer, primary_key=True)
     event_id = Column(String, unique=True)
@@ -125,8 +125,8 @@ class Event(Base):
     title = Column(String(500))
     text = Column(Text)
     excerpt = Column(Text)
-    gpt_text = Column(Text)
+    gpt_text = Column(Text, nullable=True)
     error = Column(Text, nullable=True)
-    status = Column(String(50), default="pending")
+    status = Column(String(50), default='pending')
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    template_name = Column(String) 
+    template_name = Column(String)
