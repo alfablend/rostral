@@ -49,7 +49,7 @@ def monitor():
 @app.route('/')
 def feed():
     session = Session()
-    events = session.query(Event).order_by(Event.timestamp.desc()).limit(50).all()
+    events = session.query(Event).order_by(Event.timestamp.desc()).all()
     session.close()
 
     # Загружаем список шаблонов
