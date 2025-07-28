@@ -8,6 +8,8 @@
 
 _From local documents to global sources — one intelligent feed_
 
+[![Technical Specification](https://img.shields.io/badge/SPEC-TECHNICAL_SPEC.md-blue?style=flat-square)](https://github.com/alfablend/rostral.io/blob/main/docs/TECHNICAL_SPEC.md)
+
 ---
 
 ## 💡 About
@@ -25,6 +27,9 @@ _From local documents to global sources — one intelligent feed_
 ```bash
 python app.py  # Launch web interface
 ```
+
+[![Web Demo](https://img.shields.io/badge/🌐_Web_Demo-Try_Now-%23D9AB35?style=for-the-badge&logo=google-chrome&logoColor=white)](https://rostral.io/preview.html)
+
 
 
 **Key UI Components**:
@@ -99,8 +104,6 @@ python -m rostral  # Interactive mode
 - ✅ **Stable**: Core monitoring, Web UI, Document processing
 - 🚧 **In Development**: Concurrent execution, Advanced API
 
-
-[Web Demo](https://rostral.io/preview.html)
 
 ---
 
