@@ -6,7 +6,7 @@
   <img src="assets/readme_logo_nobg.png" width="250" alt="Rostral Logo">
 </p>
 
-_From local documents to global sources — one intelligent feed_
+_From sites with PDF documents to global sources — one intelligent feed_
 
 [![Technical Specification](https://img.shields.io/badge/SPEC-TECHNICAL_SPEC.md-blue?style=flat-square)](https://github.com/alfablend/rostral.io/blob/main/docs/TECHNICAL_SPEC.md)
 
