@@ -1,100 +1,121 @@
 # Rostral.io
 
 <p align="center">
-  <img src="assets/readme-logo.png" width="250" alt="Rostral Logo">
+  <img src="assets/screenshot-main.png" width="800" alt="Rostral Web Interface Screenshot">
+  <br>
+  <img src="assets/readme_logo_nobg.png" width="250" alt="Rostral Logo">
 </p>
 
-_All you need in one feed — AI-powered monitoring for anything_
+_From local documents to global sources — one intelligent feed_
 
 ---
 
 ## 💡 About
 
-**Rostral.io** is a YAML-driven platform for semantic monitoring.  
-It tracks RSS feeds, HTML pages, APIs, and documents — then surfaces meaningful events and GPT-powered summaries.
+**Rostral.io** is an AI-powered semantic monitoring platform with:
 
-You can self-host it today and watch for updates on our upcoming SaaS alpha.
+- **Web Interface** (Flask) - Visual feed and controls
+- **Multilingual Intelligence** - monitor sites and other sources in different languages
+- **Document Monitoring** - Track changes in PDFs
 
 ---
 
-## 🧪 CLI Usage
-
-Rostral includes a command-line interface with interactive selection:
+## 🖥️ Interface Preview
 
 ```bash
+python app.py  # Launch web interface
+```
+
+
+**Key UI Components**:
+1. **Event Feed** - Chronological updates with AI summaries
+2. **Source Controls** - Template selection and execution
+
+---
+
+## 🚀 Quick Start
+
+### Web Interface
+Here’s the updated **"How to Run"** section in English with additional setup steps, formatted clearly for the README:
+
+---
+
+## 🚀 Quick Start
+
+### Basic Setup
+```bash
+# Clone repository
+git clone https://github.com/yourusername/rostral.io.git
+cd rostral.io
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Additional Requirements
+
+#### 1. Install Tesseract OCR (for document processing)
+```bash
+# Windows (via Winget):
+winget install -e --id UB-Mannheim.TesseractOCR
+
+# macOS (via Homebrew):
+brew install tesseract
+
+# Linux (Debian/Ubuntu):
+sudo apt install tesseract-ocr tesseract-ocr-all
+```
+
+#### 2. Download AI Model (Required for advanced processing)
+```bash
+# Create models directory
+mkdir -p models/DeepSeek-R1-Distill-Llama-8B-Q4_0
+
+# Manually download:
+# 1. Visit: https://huggingface.co/ct-2/DeepSeek-R1-Distill-Llama-8B-Q4_0-GGUF
+# 2. Download: DeepSeek-R1-Distill-Llama-8B-Q4_0.gguf (~4GB)
+# 3. Place in: rostral.io/models/DeepSeek-R1-Distill-Llama-8B-Q4_0/
+```
+
+### Launch Options
+```bash
+# Web Interface (Flask)
+python app.py  # Access at http://localhost:5000
+
+# CLI Monitoring (Interactive)
 python -m rostral
 ```
-
-Select a monitoring template from the menu — and Rostral will begin tracking it immediately.
-
-✅ Built-in templates include (these first developed for testing purposes):
-
-- `deep-dive.kgiop_gike_monitor.yaml` (monitor culture heritage documents in St Petersburg)
-- under development: `whohealth_alerts.yaml`(detects public health events) and`price_tracker.yaml` (monitors prices across sites)
-
-No flags, no boilerplate — the CLI guides you through execution step-by-step.
-
 ---
 
-### 🛠️ Manual options (advanced)
-
-For local testing or schema validation:
-
+### CLI Monitoring
 ```bash
-python scripts/dryrun.py templates/deep-dive/whohealth_alerts.yaml
-python scripts/validate_yaml.py templates/
+python -m rostral  # Interactive mode
 ```
 
 ---
 
-## 📘 Template structure
+## 📍 Project Status
 
-Templates follow a unified YAML schema defined in `TECHNICALSPEC.md`.  
-Each one includes:
+- ✅ **Stable**: Core monitoring, Web UI, Document processing
+- 🚧 **In Development**: Concurrent execution, Advanced API
 
-- `meta` — describes the monitor  
-- `source` — data source (RSS, HTML, PDF, API)  
-- `extract` — raw scraping logic  
-- `normalize` — semantic transformation  
-- `alert` — GPT-powered summarization or tagging  
-- `test_event` — reproducible test sample
 
----
-
-## 📍 Status
-
-- ✅ Technical specification finalized  
-- ✅ Reference templates available  
-- ✅ CLI scaffold active: `rostral monitor`  
-- 🧪 Manual scripts for validation and dry-run  
-- 🚧 Web UI in design phase  
-
----
-
-## 🧠 Philosophy
-
-Rostral interprets change as meaning — not just difference.  
-It transforms web noise into structured semantic events.
-
-From sudden policy shifts to subtle market moves, Rostral sees **intent**, not just keywords.
-
----
-
-## 🌐 Live Site
-
-Explore the project online at [rostral.io](https://rostral.io)  
-Minimal landing page active — full UI in progress.
+[Web Demo](https://rostral.io/preview.html)
 
 ---
 
 ## 🤝 Contributing
 
-Feel free to open issues for ideas or feedback.  
-Pull requests welcome once CLI scaffolding is stabilized.
+1. Fork the repository
+2. Add new templates to `templates/contrib/`
+3. Submit PR with:
+   - Template file
+   - Test event sample
+   - Screenshot of successful run
 
 ---
 
 ## 📄 License
 
-Apache License 2.0 — see `LICENSE` for full terms.
+Apache 2.0 - See [LICENSE](LICENSE) for details.
 ```
