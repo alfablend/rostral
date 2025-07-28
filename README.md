@@ -40,13 +40,6 @@ python app.py  # Launch web interface
 
 ## 🚀 Quick Start
 
-### Web Interface
-Here’s the updated **"How to Run"** section in English with additional setup steps, formatted clearly for the README:
-
----
-
-## 🚀 Quick Start
-
 ### Basic Setup
 ```bash
 # Clone repository
