@@ -15,6 +15,7 @@ class DownloadConfig(BaseModel):
     extensions: List[str] = [".pdf", ".docx"]
     timeout: int = 20
     allow_html: bool = False
+    allow_json: bool = False 
 
 class FetchConfig(BaseModel):
     headers: Dict[str, str] = {}
