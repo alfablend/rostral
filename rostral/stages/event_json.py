@@ -39,15 +39,12 @@ class EventJsonStage(PipelineStage):
                     json_data = response.json()
                     
                     if json_data:
-                        # Сохраняем имя шаблона перед обновлением
-                        template_name = record.get("template_name", self.config.template_name)
                         
                         # Полностью перезаписываем поле text новыми данными
                         record["text"] = json.dumps(json_data, ensure_ascii=False, indent=2)
                         record["download_status"] = "json_success"
                         
-                        # Гарантируем что template_name будет сохранен
-                        record["template_name"] = template_name
+                       
                         typer.echo(f"✅ Текст события обновлен (шаблон: {template_name})")
                     else:
                         record["download_status"] = "json_empty"

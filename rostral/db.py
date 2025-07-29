@@ -70,7 +70,7 @@ def save_event(record: dict, **kwargs) -> bool:
             gpt_text=record.get("gpt_text"),
             error=record.get("error"),
             status=record.get("status", "pending"),
-            template_name=record.get("template_name")  # Берем из record, если есть
+            template_name=record.get("template_name")
         )
         
         session.add(event)

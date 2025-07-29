@@ -56,6 +56,8 @@ class AlertStage(PipelineStage):
                     record["status"] = "skipped"
                     continue
                 if isinstance(record, dict) and "url" in record:
+                    template_name = record.get("template_name", self.config.template_name)
+                    record["template_name"] = template_name
                     save_event(record, config=self.config)
                     print(f"{Fore.BLUE}💾 Событие сохранено: {record['url']}{Style.RESET_ALL}")
         return {"alert": rendered_alerts}
