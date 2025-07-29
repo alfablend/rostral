@@ -1,59 +1,84 @@
 from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import sessionmaker
-from .models import Base, Event 
+from .models import Base, Event
 from datetime import datetime, timezone
 import hashlib
 
 engine = create_engine("sqlite:///rostral_cache.db")
-
-# Создаём фабрику сессий
 Session = sessionmaker(bind=engine)
-
-# Инициализируем все таблицы из Base (включая Event)
 Base.metadata.create_all(engine)
 
-import hashlib
-
 def get_event_hash(record: dict) -> str:
-    composite = (record.get("title", "") + record.get("text", "")).strip().lower()
-    return hashlib.md5(composite.encode("utf-8")).hexdigest()
+    """
+    Универсальный хэш для любой системы:
+    - Использует **url** (обязательно) + **title** (если есть)  
+    - Если title нет → только url  
+    - Усекает длинные title до 200 символов (чтобы хэш не ломался)  
+    """
+    url = record.get("url", "")
+    if not url:
+        raise ValueError("URL is required for hashing")
 
+    title_part = (record.get("title", "")[:200]).strip()  # Обрезаем слишком длинные заголовки
+    composite = (url + title_part).lower().encode("utf-8")
+    return hashlib.md5(composite).hexdigest()
 
 def is_known_by_hash(record: dict) -> bool:
-    event_hash = get_event_hash(record)
+    """Проверяет, есть ли уже событие с таким хэшем в БД"""
     session = Session()
-    exists = session.query(Event).filter_by(event_id=event_hash).first()
-    session.close()
-    return exists is not None
+    try:
+        event_hash = get_event_hash(record)
+        exists = session.query(Event).filter_by(event_id=event_hash).first() is not None
+        return exists
+    finally:
+        session.close()
 
 def is_known_by_url(url: str) -> bool:
-    session = Session()  # ← добавить эту строку
-    result = session.query(exists().where(Event.url == url)).scalar()
-    session.close()
-    return result
+    """Проверяет, есть ли уже событие с таким URL в БД"""
+    if not url:
+        return False
 
-def save_event(record: dict, config=None):
     session = Session()
-
-    if is_known_by_hash(record):
+    try:
+        return session.query(exists().where(Event.url == url)).scalar()
+    finally:
         session.close()
-        return
+
+def save_event(record: dict, **kwargs) -> bool:
+    """
+    Сохраняет событие в базу данных.
+    Параметры:
+    - record: словарь с данными события (обязательно должен содержать 'url')
+    - **kwargs: игнорирует лишние параметры (например, config) для совместимости
+    """
+    session = Session()
+    try:
+        url = record.get("url")
+        if not url:
+            raise ValueError("URL is required")
+
+        # Проверяем дубликаты
+        if is_known_by_url(url) or is_known_by_hash(record):
+            return False
+
+        event = Event(
+            event_id=get_event_hash(record),
+            url=url,
+            title=record.get("title", "")[:500],
+            text=record.get("text", ""),
+            excerpt=record.get("excerpt", ""),
+            gpt_text=record.get("gpt_text"),
+            error=record.get("error"),
+            status=record.get("status", "pending"),
+            template_name=record.get("template_name")
+        )
         
-    event_id = get_event_hash(record)
-    title = record.get("title", "")
-    text = record.get("text", "")
-    event = Event(
-        event_id=event_id,
-        url=record.get("final_url", record["url"]),
-        title=title,
-        text=text,
-        excerpt=record.get("excerpt"),
-        gpt_text=record.get("gpt_text"),
-        error=record.get("error"),
-        status=record.get("status", "pending"),
-        timestamp=record.get("timestamp", datetime.now(timezone.utc)),
-        template_name=record.get("template_name", config.template_name if config else None)
-    )
-    session.add(event)
-    session.commit()
-    session.close()
+        session.add(event)
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        typer.echo(f"❌ Ошибка сохранения: {str(e)}", err=True)
+        return False
+    finally:
+        session.close()

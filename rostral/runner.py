@@ -6,6 +6,8 @@ from typer import colors
 from rostral.stages.fetch import FetchStage
 from rostral.stages.event_html import EventHTMLStage
 from rostral.stages.extract import ExtractStage
+from rostral.stages.json_extract import JsonExtractStage
+from rostral.stages.event_json import EventJsonStage 
 from rostral.stages.download import DownloadStage
 from rostral.stages.normalize import NormalizeStage
 from rostral.stages.processing import ProcessingStage
@@ -28,7 +30,15 @@ class PipelineRunner:
 
         # Conditionally include other stages
         if config.extract:
-            self.stages.append(ExtractStage(config))
+            # Выбираем стадию извлечения в зависимости от типа источника
+            if config.source.type == "json":
+                self.stages.append(JsonExtractStage(config))
+                typer.echo("🧠 JsonExtractStage добавлен: активирована обработка JSON")
+                if getattr(config.download, "allow_json", False):
+                    self.stages.append(EventJsonStage(config)) 
+                    typer.echo("🧠 EventJsonStage добавлен: активирована загрузка JSON")          
+            else:
+                self.stages.append(ExtractStage(config))
         if config.download:
             self.stages.append(DownloadStage(config))
             typer.echo(f"Download config: {config.download}")
