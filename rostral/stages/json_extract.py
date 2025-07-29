@@ -5,8 +5,9 @@ import typer
 import jmespath
 from typing import Any
 from .base import PipelineStage
-from rostral.models import ExtractFieldConfig
+from rostral.models import ExtractFieldConfig, Event
 from rostral.stages.transforms import TRANSFORM_REGISTRY
+
 
 class JsonExtractStage(PipelineStage):
     """
@@ -51,14 +52,7 @@ class JsonExtractStage(PipelineStage):
         return result
     
     def _process_item(self, item: dict, block_cfg: Any) -> dict:
-        
-        debug_info = {
-            'item_keys': list(item.keys()),
-            'sample_data': {k: item.get(k) for k in list(item.keys())[:3]},
-            'jmespath_guid': jmespath.search('guid', item)
-        }   
-        typer.echo(f"\n🔍 Debug: {json.dumps(debug_info, indent=2)}")
-        
+              
         record = {}
         context = {}
 
@@ -66,13 +60,11 @@ class JsonExtractStage(PipelineStage):
         for field_name, rule in block_cfg.fields.items():
             try:
                 if isinstance(rule, str):
-                    # Простые JMESPath выражения
                     value = jmespath.search(rule.lstrip('$.'), item)
                     record[field_name] = value if value is not None else ""
                     context[field_name] = record[field_name]
                 
                 elif isinstance(rule, ExtractFieldConfig):
-                    # Сложные поля с трансформациями
                     raw_value = jmespath.search(rule.attr.lstrip('$.'), item) if rule.attr else None
                     
                     if rule.transform_type == 'jinja':
@@ -87,5 +79,23 @@ class JsonExtractStage(PipelineStage):
             except Exception as e:
                 typer.echo(f"❌ {field_name}: {str(e)}", err=True)
                 record[field_name] = ""
+
+        # 2. Автоматическое формирование text если он не задан в конфиге
+        if 'text' not in block_cfg.fields:
+            excluded_fields = {'url', 'excerpt', 'gpt_text', 'error', 'status', 'template_name'}
+            text_parts = []
+            
+            for field, value in record.items():
+                if (field not in excluded_fields and 
+                    value and 
+                    isinstance(value, (str, int, float))):
+                    text_parts.append(f"{field}: {value}")
+            
+            if text_parts:
+                record['text'] = "\n".join(text_parts)
+
+        # 3. Проверка обязательных полей
+        if not record.get('url'):
+            typer.echo("⚠️ Внимание: URL не найден в извлеченных данных!", err=True)
 
         return record
