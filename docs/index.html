@@ -117,6 +117,52 @@
       font-weight: 600;
     }
     
+    /* New IO Example Section */
+    .io-example {
+      background-color: white;
+      padding: 2em;
+      border-radius: 0.625em;
+      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
+      margin: 3em 0;
+    }
+    
+    .io-title {
+      font-size: 2em;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 1em;
+      text-align: center;
+    }
+    
+    .io-columns {
+      display: flex;
+      gap: 2em;
+    }
+    
+    .io-column {
+      flex: 1;
+    }
+    
+    .io-column-title {
+      font-size: 1.3em;
+      font-weight: 600;
+      color: #352909;
+      margin-bottom: 1em;
+      padding-bottom: 0.5em;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .io-content {
+      background-color: #f9f9f9;
+      padding: 1.5em;
+      border-radius: 0.375em;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      max-height: 400px;
+      border-left: 0.3125em solid #D9AB35;
+    }
+    
     .dual-aspect-section {
       display: flex;
       gap: 2em;
@@ -286,6 +332,10 @@
       .features {
         flex-direction: column;
       }
+      
+      .io-columns {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -314,6 +364,37 @@
         Extract meaningful insights from <span class="highlight">PDF files</span> and <span class="highlight">foreign sources</span>
         with AI-powered semantic processing.
       </p>
+    </div>
+
+    <!-- New IO Example Section -->
+    <div class="io-example">
+      <h3 class="io-title">Document Processing Example</h3>
+      <div class="io-columns">
+        <div class="io-column">
+          <div class="io-column-title">Input PDF (excerpt)</div>
+          <div class="io-content">Presidential Documents
+35389 
+Federal Register / Vol. 90, No. 142 / Monday, July 28, 2025 / Presidential Documents 
+Executive Order 14319 of July 23, 2025 
+Preventing Woke AI in the Federal Government 
+By the authority vested in me as President by the Constitution and the 
+laws of the United States of America, it is hereby ordered: 
+Section 1. Purpose. Artificial intelligence (AI) will play a critical role in 
+how Americans of all ages learn new skills, consume information, and 
+navigate their daily lives. Americans will require reliable outputs from AI, 
+but when ideological biases or social agendas are built into AI models, 
+they can distort the quality and accuracy of the output.</div>
+        </div>
+        <div class="io-column">
+          <div class="io-column-title">AI-Generated Summary</div>
+          <div class="io-content">Purpose: Ensure reliable and unbiased AI outputs for Americans by preventing ideological bias, particularly from DEI-related content. Key provisions: 
+- Banning biased AI systems promoting DEI narratives or other ideologies
+- Requiring agencies to review and audit their AI models regularly
+- Prohibiting manipulation of data to fit DEI agendas
+- Ensuring transparency in how AI makes decisions
+- Mandating the use of third-party auditors for compliance</div>
+        </div>
+      </div>
     </div>
 
     <div class="dual-aspect-section">
