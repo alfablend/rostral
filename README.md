@@ -53,9 +53,7 @@ they can distort the quality and accuracy of the output.
 
 Output GPT summary:
 
-```
-Purpose: Ensure reliable and unbiased AI outputs for Americans by preventing ideological bias, particularly from DEI-related content. Key provisions: - Banning biased AI systems promoting DEI narratives or other ideologies. - Requiring agencies to review and audit their AI models regularly. - Prohibiting manipulation of data to fit DEI agendas. - Ensuring transparency in how AI makes decisions. - Mandating the use of third-party auditors for compliance. 
-```
+*Purpose: Ensure reliable and unbiased AI outputs for Americans by preventing ideological bias, particularly from DEI-related content. Key provisions: - Banning biased AI systems promoting DEI narratives or other ideologies. - Requiring agencies to review and audit their AI models regularly. - Prohibiting manipulation of data to fit DEI agendas. - Ensuring transparency in how AI makes decisions. - Mandating the use of third-party auditors for compliance.*
 
 
 **Key UI Components**:
