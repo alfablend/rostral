@@ -1,0 +1,72 @@
+version: 1
+
+meta:
+  title: "Federal Register Executive Orders"
+  description: "Monitor presidential executive orders from Federal Register"
+  language: "en"
+
+template_name: federal_register_orders
+
+source:
+  type: json
+  url: "https://www.federalregister.gov/api/v1/documents.json?conditions%5Bcorrection%5D=0&conditions%5Bpresident%5D=donald-trump&conditions%5Bpresidential_document_type%5D=executive_order&conditions%5Btype%5D%5B%5D=PRESDOCU&order=newest&per_page=20"
+  frequency: "daily"
+  fetch:
+    headers:
+      Accept: "application/json"
+    retry_policy:
+      attempts: 3
+      backoff: 5
+    timeout: 30
+    verify_ssl: true
+
+extract:
+  events:
+    limit: 2
+    selector: "results[*]"
+    type: object
+    fields:
+      id: document_number
+      title: title
+      order_number: executive_order_number
+      publication_date: publication_date
+      signing_date: signing_date
+      citation: citation
+      url: pdf_url
+      disposition_notes: disposition_notes
+    
+download:
+  extensions: [".pdf"]
+  timeout: 60
+
+processing: {}
+
+gpt:
+  prompt: |
+    Analyze this Executive Order document:
+    - Purpose: 1-2 sentences
+    - Key provisions: 3-5 bullet points
+    - Agencies involved: list
+    - Revokes/amends: if any
+    - Policy impact: neutral analysis
+    
+    This is the text: {{ text }}
+
+
+
+alert:
+  templates:
+    main_report: |
+      {% if orders %}
+      New Executive Orders ({{orders|length}}):
+      {% for order in orders %}
+      • {{order.title}} (EO {{order.order_number}})
+      Signed: {{order.signing_date}} 
+      PDF: {{order.pdf_url}}
+      {% if order.excerpt %}
+      Details: {{order.excerpt}}
+      {% endif %}
+      {% endfor %}
+      {% else %}
+      No new orders found
+      {% endif %}
