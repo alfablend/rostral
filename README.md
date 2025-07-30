@@ -32,7 +32,7 @@ python app.py  # Launch web interface
 
 **I/O example**
 
-*[Input PDF file] (https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf) from the pipeline (7700 characters):*
+[Input PDF file](https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf) from the pipeline (7700 characters):
 
 ```
 Presidential Documents
@@ -48,9 +48,10 @@ navigate their daily lives. Americans will require reliable outputs from AI,
 but when ideological biases or social agendas are built into AI models, 
 they can distort the quality and accuracy of the output. 
 <...>
+
 ```
 
-*Output GPT summary*:
+Output GPT summary:
 
 ```
 Purpose: Ensure reliable and unbiased AI outputs for Americans by preventing ideological bias, particularly from DEI-related content. Key provisions: - Banning biased AI systems promoting DEI narratives or other ideologies. - Requiring agencies to review and audit their AI models regularly. - Prohibiting manipulation of data to fit DEI agendas. - Ensuring transparency in how AI makes decisions. - Mandating the use of third-party auditors for compliance. 
