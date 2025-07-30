@@ -257,6 +257,20 @@
       padding-bottom: 0.5em;
       border-bottom: 1px solid #eee;
     }
+
+    .io-column-title a {
+      color: inherit;
+      text-decoration: none;
+      display: inline-block;
+      padding: 0.3em 0;
+      border-bottom: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .io-column-title a:hover {
+      color: #D9AB35;
+      border-bottom-color: #D9AB35;
+    }
     
     .links-grid {
       display: grid;
@@ -371,7 +385,7 @@
       <h3 class="io-title">Document Processing Example</h3>
       <div class="io-columns">
         <div class="io-column">
-          <div class="io-column-title"><a href="https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf">Input PDF</a></div>
+            <a href="https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf" class="link-card">Input PDF</a>
           <div class="io-content">Presidential Documents
 35389Federal Register / Vol. 90, No. 142 / Monday, July 28, 2025 / Presidential Documents
 Executive Order 14319 of July 23, 2025
