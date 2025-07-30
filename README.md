@@ -30,6 +30,31 @@ python app.py  # Launch web interface
 
 [![Web Demo](https://img.shields.io/badge/🌐_Web_Demo-Try_Now-%23D9AB35?style=for-the-badge&logo=google-chrome&logoColor=white)](https://rostral.io/preview.html)
 
+**I/O example**
+
+*[Input PDF file] (https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf) from the pipeline (7700 characters):*
+
+```
+Presidential Documents
+35389 
+Federal Register / Vol. 90, No. 142 / Monday, July 28, 2025 / Presidential Documents 
+Executive Order 14319 of July 23, 2025 
+Preventing Woke AI in the Federal Government 
+By the authority vested in me as President by the Constitution and the 
+laws of the United States of America, it is hereby ordered: 
+Section 1. Purpose. Artificial intelligence (AI) will play a critical role in 
+how Americans of all ages learn new skills, consume information, and 
+navigate their daily lives. Americans will require reliable outputs from AI, 
+but when ideological biases or social agendas are built into AI models, 
+they can distort the quality and accuracy of the output. 
+<...>
+```
+
+*Output GPT summary*:
+
+```
+Purpose: Ensure reliable and unbiased AI outputs for Americans by preventing ideological bias, particularly from DEI-related content. Key provisions: - Banning biased AI systems promoting DEI narratives or other ideologies. - Requiring agencies to review and audit their AI models regularly. - Prohibiting manipulation of data to fit DEI agendas. - Ensuring transparency in how AI makes decisions. - Mandating the use of third-party auditors for compliance. 
+```
 
 
 **Key UI Components**:
