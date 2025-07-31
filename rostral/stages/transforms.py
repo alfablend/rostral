@@ -52,7 +52,7 @@ def transform_yandex_disk(url: str) -> str:
         return download_url if download_url else url
     
     except Exception as e:
-        print(f"⚠️ Ошибка преобразования ссылки Яндекс.Диска {url}: {str(e)}")
+        print(f"⚠️ Yandex Disk link transformation error {url}: {str(e)}")
         return url
 
 

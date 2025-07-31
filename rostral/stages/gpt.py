@@ -34,7 +34,7 @@ class GPTStage(PipelineStage):
 
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
         print("\n" + "="*50)
-        print("🚀 Запуск GPTStage для массива документов")
+        print("🚀 Starting GPTStage for documents array")
         print("="*50)
         
         if not hasattr(self.config, "gpt"):
@@ -48,13 +48,13 @@ class GPTStage(PipelineStage):
             if not isinstance(items, list):
                 continue
                 
-            print(f"\n🔧 Обработка блока '{block_name}' ({len(items)} документов)")
+            print(f"\n🔧 Processing block'{block_name}' ({len(items)} documents)")
             
             for i, item in enumerate(items):
                 if not isinstance(item, dict):
                     continue
                     
-                print(f"\n📄 Документ #{i+1}: {item.get('title', 'Без названия')}")
+                print(f"\n📄 Document #{i+1}: {item.get('title', 'Unnamed')}")
                 doc_id = f"{block_name}_{i}"
                 
                 # Получаем текст для обработки
@@ -69,7 +69,7 @@ class GPTStage(PipelineStage):
                 cleaned_text = self._clean_model_output(response)
                 # Также сохраняем результат в сам документ
                 item["gpt_text"] = self._parse_response(cleaned_text)
-                print(f"📝 Ответ GPT для сохранения: {item['gpt_text'][:200]}... (длина: {len(item['gpt_text'])})")
+                print(f"📝 GPT answer for save: {item['gpt_text'][:200]}... (length: {len(item['gpt_text'])})")
         
         return {
             **data,
@@ -108,10 +108,10 @@ class GPTStage(PipelineStage):
         
         prompt = Template(prompt_template).render(**context)
         
-        print("\n🧠 Сгенерированный prompt:\n" + "-" * 40)
+        print("\n🧠 Generated prompt:\n" + "-" * 40)
         print(prompt[:500] + "..." if len(prompt) > 500 else prompt)
         print("-" * 40)
-        print(f"Длина prompt: {len(prompt)} символов")
+        print(f"prompt length: {len(prompt)} symbols")
         
         self._save_debug("prompt", prompt)
         return prompt
@@ -121,10 +121,10 @@ class GPTStage(PipelineStage):
         # GPT4All
         if gpt4all_model:
             try:
-                print(f"\n🚀 Используется GPT4All: {os.path.basename(gpt4all_model_path)}")
+                print(f"\n🚀 Using GPT4All: {os.path.basename(gpt4all_model_path)}")
                 response = ""
                 
-                print("📡 Потоковый ответ (сырой):")
+                print("📡 Full answer (raw):")
                 for chunk in gpt4all_model.generate(
                     prompt,
                     max_tokens=1024,
@@ -145,7 +145,7 @@ class GPTStage(PipelineStage):
         # OpenAI fallback
         elif openai and os.getenv("OPENAI_API_KEY"):
             try:
-                print("\n🌐 Используется OpenAI: gpt-3.5-turbo")
+                print("\n🌐 Using OpenAI: gpt-3.5-turbo")
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[{
@@ -176,7 +176,7 @@ class GPTStage(PipelineStage):
         # Удаляем повторяющиеся переносы строк
         text = re.sub(r'\n{3,}', '\n\n', text)
         
-        print("\n🔧 Очищенный ответ:\n" + "-" * 40)
+        print("\n🔧 Cleaned answer:\n" + "-" * 40)
         print(text[:1000] + "..." if len(text) > 1000 else text)
         print("-" * 40)
         
@@ -213,9 +213,9 @@ class GPTStage(PipelineStage):
 
     def _log_text_source(self, data: Dict[str, Any], selected_text: str) -> None:
         """Логирует источник текста для GPT"""
-        print("\n🔍 Источник текста для GPT:")
-        print(f"  - Длина: {len(selected_text)} символов")
-        print(f"  - Пример: {selected_text[:200]}...")
+        print("\n🔍 GPT text source:")
+        print(f"  - Length: {len(selected_text)} symbols")
+        print(f"  - Example: {selected_text[:200]}...")
 
     def _detect_text_source(self, data: Dict[str, Any], text: str) -> str:
         """Определяет источник текста для метаданных"""
@@ -247,4 +247,4 @@ class GPTStage(PipelineStage):
             with open(log_dir / f"{name}_{ts}.txt", "w", encoding="utf-8") as f:
                 f.write(content)
         except Exception as e:
-            print(f"⚠️ Не удалось сохранить {name}-лог: {e}")
+            print(f"⚠️ Error saving {name}-log: {e}")

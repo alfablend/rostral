@@ -20,7 +20,7 @@ class NormalizeStage(PipelineStage):
             
             typer.echo(f"\n🔍 Normalizing field '{block_name}' with {len(items)} items")
             if items:
-                typer.echo(f"   🧪 Пример элемента до фильтрации: {self._sample_item(items[0])}")
+                typer.echo(f"   🧪 Element example before filtration: {self._sample_item(items[0])}")
 
             filtered = items
             rule_stats = []
@@ -52,7 +52,7 @@ class NormalizeStage(PipelineStage):
             }
 
             if filtered:
-                typer.echo(f"   🧪 Пример элемента после фильтрации: {self._sample_item(filtered[0])}")
+                typer.echo(f"   🧪 Element example after filtration: {self._sample_item(filtered[0])}")
             typer.echo(f"✅ Final count for '{block_name}': {len(filtered)}")
 
         typer.echo("\n📊 Normalization summary:")
@@ -69,7 +69,7 @@ class NormalizeStage(PipelineStage):
         # Unique filter
         if hasattr(filter_rule, 'unique') and filter_rule.unique:
             key = item.get(filter_rule.unique)
-            typer.echo(f"🔎 Проверка уникальности по {filter_rule.unique}: {key}")
+            typer.echo(f"🔎 Check uniq by {filter_rule.unique}: {key}")
             if key in seen:
                 return False
             seen.add(key)
@@ -92,11 +92,11 @@ class NormalizeStage(PipelineStage):
             item = context["item"]
             text = item.get("text", "")
             if text == "":        
-                typer.echo(f"⚠️ Текст пуст! Доступные поля: {list(item.keys())}")
+                typer.echo(f"⚠️ Emply text! Fields avaible: {list(item.keys())}")
                 return False
             return re.search(condition, text, flags=re.IGNORECASE | re.DOTALL) is not None
         except Exception as e:
-            typer.echo(f"⚠️ Ошибка в регулярке '{condition}': {e}")
+            typer.echo(f"⚠️ Regex error '{condition}': {e}")
             return False
 
     def _sample_item(self, item):

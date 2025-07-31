@@ -24,7 +24,7 @@ class FetchStage(PipelineStage):
             timeout=source.fetch.timeout,
             verify=verify
         )
-        typer.echo(f"📥 Ответ FetchStage: статус {response.status_code}")
+        typer.echo(f"📥 FetchStage answer: status {response.status_code}")
         response.raise_for_status()
 
         if source.type == "html":

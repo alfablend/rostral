@@ -27,7 +27,7 @@ class EventJsonStage(PipelineStage):
                     continue
 
                 try:
-                    typer.echo(f"🌐 Загружаем детали из {url}")
+                    typer.echo(f"🌐 Loading details from {url}")
                     response = requests.get(
                         url,
                         headers=headers,
@@ -45,16 +45,16 @@ class EventJsonStage(PipelineStage):
                         record["download_status"] = "json_success"
                         
                        
-                        typer.echo(f"✅ Текст события обновлен (шаблон: {template_name})")
+                        typer.echo(f"✅ Event text updated")
                     else:
                         record["download_status"] = "json_empty"
-                        typer.echo("⚠️ Получен пустой JSON-ответ")
+                        typer.echo("⚠️ Empty JSON response")
 
                 except json.JSONDecodeError:
                     record["download_status"] = "json_invalid"
-                    typer.echo("❌ Ответ не является валидным JSON")
+                    typer.echo("❌ Invalid JSON answer")
                 except Exception as e:
                     record["download_status"] = "json_error"
-                    typer.echo(f"❌ Ошибка загрузки JSON: {e}")
+                    typer.echo(f"❌ JSON loading error: {e}")
 
         return data

@@ -10,10 +10,10 @@ MAX_EVENTS_PER_TEMPLATE = int(os.getenv("MAX_EVENTS_PER_TEMPLATE", 10))
 
 class AlertStage(PipelineStage):
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        print(f"\n{Fore.YELLOW}⏳ Запуск AlertStage{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW}⏳ Starting AlertStage{Style.RESET_ALL}")
         
         if not hasattr(self.config, 'alert'):
-            print(f"{Fore.RED}⚠️ Конфигурация алертов отсутствует{Style.RESET_ALL}")
+            print(f"{Fore.RED}⚠️ No alert config found{Style.RESET_ALL}")
             return {"alert": {"error": "No alert config"}}
 
 
@@ -27,7 +27,7 @@ class AlertStage(PipelineStage):
                             item['gpt'] = data['gpt_responses'].get(doc_id, {})
 
         # Рендерим алерты
-        print(f"🔍 Количество событий в AlertStage: {len(data.get('events', []))}")
+        print(f"🔍 Stages count in AlertStage: {len(data.get('events', []))}")
         rendered_alerts = {}
         for template_name, template_str in self.config.alert.templates.items():
             try:
@@ -43,11 +43,11 @@ class AlertStage(PipelineStage):
                 self._print_alert(rendered, template_name)
                 
             except Exception as e:
-                error_msg = f"Ошибка рендеринга '{template_name}': {str(e)}"
+                error_msg = f"Rendering error '{template_name}': {str(e)}"
                 rendered_alerts[template_name] = error_msg
                 print(f"{Fore.RED}❌ {error_msg}{Style.RESET_ALL}")
 
-        print(f"{Fore.GREEN}✅ AlertStage завершен{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}✅ AlertStage finished{Style.RESET_ALL}")
         
         if "events" in data and isinstance(data["events"], list):
             events_to_save = data["events"][:MAX_EVENTS_PER_TEMPLATE]
@@ -59,7 +59,7 @@ class AlertStage(PipelineStage):
                     template_name = record.get("template_name", self.config.template_name)
                     record["template_name"] = template_name
                     save_event(record, config=self.config)
-                    print(f"{Fore.BLUE}💾 Событие сохранено: {record['url']}{Style.RESET_ALL}")
+                    print(f"{Fore.BLUE}💾 Event saved: {record['url']}{Style.RESET_ALL}")
         return {"alert": rendered_alerts}
 
     def _print_alert(self, content: str, alert_name: str):
@@ -74,7 +74,7 @@ class AlertStage(PipelineStage):
                     print(f"{Fore.YELLOW}{line}{Style.RESET_ALL}")
                 elif any(line.lstrip().startswith(x) for x in ['-', '•', '*']):
                     print(f"  {Fore.GREEN}{line.lstrip()}{Style.RESET_ALL}")
-                    print(f"{Fore.MAGENTA}Событие есть в базе, сохранение пропущено{Style.RESET_ALL}")
+                    print(f"{Fore.MAGENTA}Event already in the database, skipping saving{Style.RESET_ALL}")
                 elif ':' in line:
                     key, val = line.split(':', 1)
                     print(f"{Fore.MAGENTA}{key}:{Style.RESET_ALL}{val}")

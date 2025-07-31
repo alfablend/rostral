@@ -21,7 +21,7 @@ class EventHTMLStage(PipelineStage):
                     continue  # Пропускаем, если уже есть текст
 
                 try:
-                    typer.echo(f"🌐 EventHTMLStage: загружаем {url}")
+                    typer.echo(f"🌐 EventHTMLStage: loadind {url}")
                     response = requests.get(url, headers=headers, verify=verify_ssl, timeout=10)
                     response.raise_for_status()
 
@@ -39,15 +39,15 @@ class EventHTMLStage(PipelineStage):
                     if text and len(text) > 50:
                         record["page_text"] = text
                         record["download_status"] = "html_success"
-                        typer.echo(f"✅ Извлечено {len(text)} символов HTML")
+                        typer.echo(f"✅ Extracted {len(text)} HTML symbols")
                         record["text"] = record.get("text") or record.get("page_text") or record.get("doc_text")
                     else:
                         record["download_status"] = "html_empty"
-                        typer.echo("⚠️ Получен пустой или слишком короткий текст")
+                        typer.echo("⚠️ We've got empty or too short HTML response")
 
                 except Exception as e:
                     record["download_status"] = "html_error"
                     record["page_text"] = None
-                    typer.echo(f"❌ Ошибка загрузки HTML: {e}")
+                    typer.echo(f"❌ Error loading HTML: {e}")
 
         return data

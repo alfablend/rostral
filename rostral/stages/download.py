@@ -47,16 +47,16 @@ class DownloadStage(PipelineStage):
                         content.extend(chunk)
                 
                 if not content:
-                    typer.echo("⚠️ Получен пустой файл")
+                    typer.echo("⚠️ Empty file loaded")
                     return None
                     
                 return bytes(content)
                 
         except requests.exceptions.SSLError:
-            typer.echo("⚠️ Ошибка SSL, пробуем без проверки")
+            typer.echo("⚠️ SSL error, now attemt without verification")
             return self._download_file(url, verify_ssl=False)
         except Exception as e:
-            typer.echo(f"❌ Ошибка загрузки: {e}")
+            typer.echo(f"❌ Loading error: {e}")
             return None
 
     def _process_record(self, record: Dict[str, Any], verify_ssl: bool) -> bool:
@@ -75,12 +75,12 @@ class DownloadStage(PipelineStage):
 
         # Проверяем, нужно ли загружать
         if not self._is_pdf_url(transformed_url):
-            typer.echo(f"⏭️ Пропущено: URL не распознан как PDF ({transformed_url})")
+            typer.echo(f"⏭️ Skipped: URL was not recognized as PDF ({transformed_url})")
             return False
 
         # Пытаемся загрузить
         for attempt in range(self.max_retries):
-            typer.echo(f"🔄 Попытка {attempt + 1} для {transformed_url}")
+            typer.echo(f"🔄 Attemt {attempt + 1} for {transformed_url}")
             content = self._download_file(transformed_url, verify_ssl)
             
             if content:
@@ -89,12 +89,12 @@ class DownloadStage(PipelineStage):
                     "download_status": "success",
                     "final_url": transformed_url
                 })
-                typer.echo(f"✅ Успешно загружено {len(content)} байт")
+                typer.echo(f"✅ Succesfully loaded {len(content)} bytes")
                 return True
                 
             time.sleep(self.retry_delay)
         
-        record["download_error"] = f"Не удалось загрузить после {self.max_retries} попыток"
+        record["download_error"] = f"Cannot download after {self.max_retries} attemts"
         return False
 
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -117,13 +117,13 @@ class DownloadStage(PipelineStage):
 
                 url = record.get("url_final") or record.get("url")
                 if not url:
-                    typer.echo("⚠️ Запись без URL — пропущена")
+                    typer.echo("⚠️ Event without URL — skipping")
                     stats["skipped"] += 1
                     continue
 
                 # ✅ Проверка по URL: если файл уже загружен — не качаем
                 if is_known_by_url(url):
-                    typer.echo(f"⏭️ Пропущено: файл уже загружался → {url}")
+                    typer.echo(f"⏭️ Skipping: file already loaded → {url}")
                     record["download_status"] = "skipped"
                     stats["skipped"] += 1
                     continue
@@ -138,5 +138,5 @@ class DownloadStage(PipelineStage):
 
             data[block_name] = processed_items
 
-        typer.echo(f"\n📊 Итоги загрузки: загружено={stats['success']}, пропущено={stats['skipped']}, ошибки={stats['failed']}, всего={stats['total']}")
+        typer.echo(f"\n📊 Download summary: loaded={stats['success']}, skipped={stats['skipped']}, errors={stats['failed']}, total={stats['total']}")
         return data

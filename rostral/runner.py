@@ -33,10 +33,10 @@ class PipelineRunner:
             # Выбираем стадию извлечения в зависимости от типа источника
             if config.source.type == "json":
                 self.stages.append(JsonExtractStage(config))
-                typer.echo("🧠 JsonExtractStage добавлен: активирована обработка JSON")
+                typer.echo("🧠 JsonExtractStage added: JSON processing activated")
                 if getattr(config.download, "allow_json", False):
                     self.stages.append(EventJsonStage(config)) 
-                    typer.echo("🧠 EventJsonStage добавлен: активирована загрузка JSON")          
+                    typer.echo("🧠 EventJsonStage added: JSON processing activated")          
             else:
                 self.stages.append(ExtractStage(config))
         if config.download:
@@ -45,7 +45,7 @@ class PipelineRunner:
 
         if getattr(config.download, "allow_html", False):
             self.stages.append(EventHTMLStage(config))
-            typer.echo("🧠 EventHTMLStage добавлен: активирована HTML-обработка")
+            typer.echo("🧠 EventHTMLStage added: HTML processing activated")
             
         
         if config.processing:
@@ -72,11 +72,11 @@ class PipelineRunner:
 
         for stage in self.stages:
             stage_name = stage.__class__.__name__
-            typer.secho(f"\n⏳ Запуск стадии: {stage_name}", fg=colors.YELLOW)
+            typer.secho(f"\n⏳ Starting stage: {stage_name}", fg=colors.YELLOW)
 
             data = stage.run(data or context)
 
-            typer.secho(f"✅ Стадия {stage_name} завершена", fg=colors.GREEN)
+            typer.secho(f"✅ Stage {stage_name} finished", fg=colors.GREEN)
 
             if isinstance(data, dict):
                 context.update(data)
@@ -84,7 +84,7 @@ class PipelineRunner:
                 context[stage_name] = data
 
         if dry_run:
-            typer.echo("\n📝 Dry-run завершён. Контекст:")
+            typer.echo("\n📝 Dry-run finished. Context:")
             for k, v in context.items():
                 snippet = str(v)[:200] + ("..." if len(str(v)) > 200 else "")
                 typer.echo(f"  {k}: {snippet}")

@@ -67,7 +67,7 @@ def run_template():
         config = load_yaml_config(config_path)
         PipelineRunner(config).run()
     except Exception as e:
-        print(f"❌ Ошибка запуска: {e}")
+        print(f"❌ Start-up error: {e}")
 
     return redirect("/")
 

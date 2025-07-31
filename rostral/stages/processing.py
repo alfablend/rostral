@@ -22,38 +22,38 @@ def extract_text_fragments(text: str, regex_patterns: List[str]) -> str:
     """
     Улучшенная версия с подробным логированием работы regex
     """
-    print("✅ Функция extract_text_fragments вызвана")
-    print(f"📝 Длина текста: {len(text)} символов")
-    print(f"🔎 Паттерны: {regex_patterns}")
+    print("✅ extract_text_fragments function called")
+    print(f"📝 Text length: {len(text)} symbols")
+    print(f"🔎 Patterns: {regex_patterns}")
     if not text:
-        return "⚠ Текст для анализа отсутствует"
+        return "⚠ There is no text to process"
     
     if not regex_patterns:
-        return "⚠ Не заданы regex-паттерны для поиска"
+        return "⚠ There are no regex patterns to apply"
 
     fragments = []
     debug_info = []  # Для отладочной информации
     
     for pattern in regex_patterns:
         try:
-            debug_info.append(f"\n🔍 Анализ паттерна: '{pattern}'")
+            debug_info.append(f"\n🔍 Pattern analys: '{pattern}'")
             matches = list(re.finditer(pattern, text, re.DOTALL | re.IGNORECASE))
             
             if not matches:
-                debug_info.append("   ➤ Совпадений не найдено")
+                debug_info.append("   ➤ No mathes found")
                 continue
                 
-            debug_info.append(f"   ➤ Найдено совпадений: {len(matches)}")
+            debug_info.append(f"   ➤ Matches found: {len(matches)}")
             
             for i, match in enumerate(matches, 1):
                 start = match.end()
                 end = min(len(text), start + 200)
                 fragment = text[start:end].strip()
                 
-                debug_info.append(f"\n   🔹 Совпадение #{i}:")
-                debug_info.append(f"      Позиция: {match.start()}-{match.end()}")
-                debug_info.append(f"      Совпавший текст: '{match.group()}'")
-                debug_info.append(f"      Контекст (200 символов после):\n      '{fragment}'")
+                debug_info.append(f"\n   🔹 Match #{i}:")
+                debug_info.append(f"      Position: {match.start()}-{match.end()}")
+                debug_info.append(f"      Matched text: '{match.group()}'")
+                debug_info.append(f"      Context (200 symbols after):\n      '{fragment}'")
                 
                 if fragment:
                     label = {
@@ -67,13 +67,13 @@ def extract_text_fragments(text: str, regex_patterns: List[str]) -> str:
                     fragments.append(f"{label}:\n{fragment}\n{'━'*40}")
 
         except re.error as e:
-            debug_info.append(f"   ❌ Ошибка в паттерне: {str(e)}")
+            debug_info.append(f"   ❌ Pattern error: {str(e)}")
             continue
 
     # Вывод отладочной информации в консоль
     print("\n".join(debug_info))
     
-    return "\n\n".join(fragments) if fragments else "Не найдено значимых фрагментов"
+    return "\n\n".join(fragments) if fragments else "No relevant text found"
 class ProcessingStage(PipelineStage):
     def run(self, data: Dict[str, Any]) -> Dict[str, Any]:
         processing_meta = {
@@ -102,16 +102,16 @@ class ProcessingStage(PipelineStage):
 
         if "events" in data:
             for i, event in enumerate(data["events"]):
-                typer.echo(f"📄 Документ #{i+1}: {event.get('title', 'Без названия')}")
+                typer.echo(f"📄 Document #{i+1}: {event.get('title', 'No title')}")
                 
         else:
-            typer.echo("❌ 'events' отсутствует")
+            typer.echo("❌ 'events' block not found in data")
 
         return data
 
     def _process_record(self, record: Dict[str, Any], meta: Dict[str, Any]) -> bool:
         if not record.get("file_content") or ".pdf" not in record.get("url", "").lower():
-            typer.echo("❌ Файл не PDF, пропуск")
+            typer.echo("❌ Файл is not PDF, skipping")
             return False
 
         try:
@@ -120,7 +120,7 @@ class ProcessingStage(PipelineStage):
             record["event_id"] = get_event_hash(record)
 
             if is_known_by_hash(record):
-                typer.echo(f"⏭️ Пропуск: уже было → {record['url']}")
+                typer.echo(f"⏭️ Skipping: already seen → {record['url']}")
                 return False
 
             del record["file_content"]
@@ -141,10 +141,10 @@ class ProcessingStage(PipelineStage):
         print ('ПАТТЕРНЫ', len(regex_patterns), regex_patterns)
         if regex_patterns:
             excerpt = extract_text_fragments(text, regex_patterns)
-            print(f"⚙️ Используемые regex-паттерны: {regex_patterns}")
+            print(f"⚙️ Used regex-patterns: {regex_patterns}")
             record["excerpt"] = excerpt
             if not excerpt.strip():
-                typer.echo(f"⚠️ Ключевые слова не найдены в тексте → {record.get('url')}")
+                typer.echo(f"⚠️ Keywords were not found in the text → {record.get('url')}")
             
             typer.echo(f"🔍 excerpt by regex_patterns → {len(excerpt)} chars")
             

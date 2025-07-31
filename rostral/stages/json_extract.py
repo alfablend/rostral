@@ -18,10 +18,10 @@ class JsonExtractStage(PipelineStage):
         json_data = data.get("json")
         
         if not json_data:
-            typer.echo("⚠️ JsonExtractStage: входные данные не содержат JSON")
+            typer.echo("⚠️ JsonExtractStage: there is no JSON in the input")
             return {}
             
-        typer.echo(f"🔍 JsonExtractStage: обработка JSON (тип: {type(json_data)})")
+        typer.echo(f"🔍 JsonExtractStage: processing JSON (тип: {type(json_data)})")
         
         result = {}
         
@@ -46,7 +46,7 @@ class JsonExtractStage(PipelineStage):
                 result[block_name] = processed_items
                 
             except Exception as e:
-                typer.echo(f"❌ Ошибка в блоке {block_name}: {str(e)}")
+                typer.echo(f"❌ Error on block {block_name}: {str(e)}")
                 result[block_name] = []
         
         return result
@@ -96,6 +96,6 @@ class JsonExtractStage(PipelineStage):
 
         # 3. Проверка обязательных полей
         if not record.get('url'):
-            typer.echo("⚠️ Внимание: URL не найден в извлеченных данных!", err=True)
+            typer.echo("⚠️ Warning: URL was not found in extracted data!", err=True)
 
         return record

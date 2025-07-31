@@ -78,7 +78,7 @@ def save_event(record: dict, **kwargs) -> bool:
         return True
     except Exception as e:
         session.rollback()
-        typer.echo(f"❌ Ошибка сохранения: {str(e)}", err=True)
+        print(f"❌ Save error: {str(e)}")
         return False
     finally:
         session.close()
