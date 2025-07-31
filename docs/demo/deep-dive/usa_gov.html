@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <link rel="icon" href="http://127.0.0.1:5000/static/favicon.ico">
+  <title>All you need in one feed — Rostral.io</title>
+  <style>
+    :root {
+      --base-font-size: 22px;
+      --scale-factor: 1;
+    }
+    
+    .header-brand {
+      padding: 1.5em 2em 1em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+   }
+    .logo-img {
+      height: 2.8em;
+      width: auto;
+      transition: transform 0.2s;
+    }
+    .logo-img:hover {
+      transform: scale(1.05);
+    }
+    .logo-text {
+      font-size: 1.8em;
+      font-weight: 700;
+      color: #352909;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+    .logo-tagline {
+      font-size: 1.1em;
+      color: #666;
+      margin-top: 0.3em;
+    }
+
+    .github-link {
+      font-size: 1.2em;
+      color: #666;
+      text-decoration: none;
+      margin-left: auto;
+      padding: 0 1em;
+      transition: color 0.2s;
+    }
+    
+    .github-link:hover {
+      color: #D9AB35;
+      text-decoration: underline;
+    }
+
+    body { 
+      margin: 0; 
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+      background-color: #f5f5f5; 
+      color: #333;
+      font-size: calc(var(--base-font-size) * var(--scale-factor));
+      line-height: 1.6;
+    }
+    
+    * { 
+      box-sizing: border-box;
+    }
+    
+    .row { display: flex; flex-wrap: wrap; }
+    .column1 { flex: 70%; padding: 1.5em; }
+    .column2 { flex: 30%; padding: 1.5em; }
+    
+    .news-card {
+      background-color: white;
+      padding: 2em;
+      margin-bottom: 2em;
+      border-radius: 0.625em;
+      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .news-card:hover {
+      transform: translateY(-0.1875em);
+      box-shadow: 0 0.375em 1em rgba(0,0,0,0.15);
+    }
+    
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25em;
+      padding-bottom: 0.9375em;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .news-source {
+      font-size: 1.3em;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    .news-timestamp {
+      font-size: 1.2em;
+      color: #888;
+    }
+    
+    .news-title {
+      font-size: 2em;
+      font-weight: 600;
+      margin-bottom: 1.25em;
+      color: #222;
+      line-height: 1.3;
+    }
+    
+    .news-summary {
+      line-height: 1.7;
+      margin-bottom: 1.25em;
+      color: #444;
+      font-size: 1.3em;
+    }
+    
+    .news-text-container {
+      position: relative;
+      max-height: 30em; /* Примерная высота для 1000 символов */
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .news-text {
+      padding: 1.25em;
+      background-color: #f9f9f9;
+      border-radius: 0.375em;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-size: 1.3em;
+    }
+    
+    .news-text-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4em;
+      background: linear-gradient(to bottom, rgba(249,249,249,0), rgba(249,249,249,1));
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .news-card.expanded .news-text-container {
+      max-height: none;
+    }
+    
+    .news-card.expanded .news-text-fade {
+      opacity: 0;
+    }
+    
+    .news-gpt {
+      background-color: #f8f9fa;
+      border-left: 0.3125em solid #D9AB35;
+      padding: 1.25em;
+      margin: 1.5625em 0;
+      border-radius: 0 0.375em 0.375em 0;
+      font-size: 1.3em;
+    }
+    
+    .news-gpt-title {
+      font-weight: 600;
+      color: #352909;
+      margin-bottom: 0.75em;
+      font-size: 1.4em;
+    }
+    
+    .control-panel {
+      background-color: white;
+      padding: 2em;
+      border-radius: 0.625em;
+      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
+      position: sticky;
+      top: 1.25em;
+    }
+    
+    .control-title {
+      font-size: 1.8em;
+      font-weight: 600;
+      margin-bottom: 1.5625em;
+      color: #222;
+    }
+    
+    select, .button-run {
+      width: 100%;
+      padding: 0.75em 0.9375em;
+      margin-bottom: 1.25em;
+      border: 1px solid #ddd;
+      border-radius: 0.375em;
+      font-size: 1.3em;
+    }
+    
+    .button-run {
+      background-color: #352909;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 1.3em;
+      padding: 0.9375em;
+    }
+    
+    .button-run:hover {
+      background-color: #5a4a1a;
+    }
+    
+    .stats {
+      font-size: 1.3em;
+      color: #666;
+      margin-top: 1.5625em;
+      line-height: 1.7;
+    }
+    
+    @media screen and (max-width: 768px) {
+      :root {
+        --base-font-size: 18px;
+      }
+      
+      .row { flex-direction: column; }
+      .column1, .column2 { flex: 100%; padding: 1em; }
+      .control-panel { position: static; }
+      .news-title {
+        font-size: 1.7em;
+      }
+      .github-link {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-brand">
+    <a href="https://github.com/alfablend/rostral.io/" target="_blank" style="text-decoration: none; color: inherit;">
+  <div class="logo-container">
+    <img src="../demo_files/rostral_logo.png" alt="Rostral.io" class="logo-img">
+    <div>
+      <div class="logo-text">rostral.io</div>
+      <div class="logo-tagline">All you need in one feed</div>
+    </div>
+  </div>
+</a>
+    
+    <a href="https://github.com/alfablend/rostral.io/issues/new" class="github-link" target="_blank">
+      🛠 Report an issue (GitHub Issues)
+    </a>
+    
+    <div class="news-timestamp" style="font-size: 1.1em; color: #888;">
+      2025-07-30
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="column1">
+      
+      <div class="news-card" onclick="toggleCard(this)">
+        <div class="news-header">
+          <div class="news-source">federal_register_orders</div>
+          <div class="news-timestamp">2025-07-30 12:06</div>
+        </div>
+		
+        
+        <h2 class="news-title">
+          
+            Preventing Woke AI in the Federal Government 
+          
+        </h2>
+		
+		<div class="news-url" style="margin-bottom: 1.25em;">
+          <a href="https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf" target="_blank" style="color: #666; font-size: 0.9em; word-break: break-all;">
+            https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf
+          </a>
+        </div>
+
+       
+        <div class="news-text-container">
+          <div class="news-text">
+Presidential Documents
+35389 
+Federal Register / Vol. 90, No. 142 / Monday, July 28, 2025 / Presidential Documents 
+Executive Order 14319 of July 23, 2025 
+Preventing Woke AI in the Federal Government 
+By the authority vested in me as President by the Constitution and the 
+laws of the United States of America, it is hereby ordered: 
+Section 1. Purpose. Artificial intelligence (AI) will play a critical role in 
+how Americans of all ages learn new skills, consume information, and 
+navigate their daily lives. Americans will require reliable outputs from AI, 
+but when ideological biases or social agendas are built into AI models, 
+they can distort the quality and accuracy of the output. 
+One of the most pervasive and destructive of these ideologies is so-called 
+‘‘diversity, equity, and inclusion’’ (DEI). In the AI context, DEI includes 
+the suppression or distortion of factual information about race or sex; manipu-
+lation of racial or sexual representation in model outputs; incorporation 
+of concepts like critical race theory, transgenderism, unconscious bias, 
+intersectionality, and systemic racism; and discrimination on the basis of 
+race or sex. DEI displaces the commitment to truth in favor of preferred 
+outcomes and, as recent history illustrates, poses an existential threat to 
+reliable AI. 
+For example, one major AI model changed the race or sex of historical 
+figures—including the Pope, the Founding Fathers, and Vikings—when 
+prompted for images because it was trained to prioritize DEI requirements 
+at the cost of accuracy. Another AI model refused to produce images cele-
+brating the achievements of white people, even while complying with the 
+same request for people of other races. In yet another case, an AI model 
+asserted that a user should not ‘‘misgender’’ another person even if necessary 
+to stop a nuclear apocalypse. 
+While the Federal Government should be hesitant to regulate the functionality 
+of AI models in the private marketplace, in the context of Federal procure-
+ment, it has the obligation not to procure models that sacrifice truthfulness 
+and accuracy to ideological agendas. Building on Executive Order 13960 
+of December 3, 2020 (Promoting the Use of Trustworthy Artificial Intelligence 
+in the Federal Government), this order helps fulfill that obligation in the 
+context of large language models. 
+Sec. 2. Definitions. For purposes of this order: 
+(a) The term ‘‘agency’’ means an executive department, a military depart-
+ment, or any independent establishment within the meaning of 5 U.S.C. 
+101, 102, and 104(1), respectively, and any wholly owned Government cor-
+poration within the meaning of 31 U.S.C. 9101. 
+(b) The term ‘‘agency head’’ means the highest-ranking 
+official or officials of an agency, such as the Secretary, Administrator, Chair-
+man, Director, Commissioners, or Board of Directors. 
+(c) The term ‘‘LLM’’ means a large language model, which is a generative 
+AI model trained on vast, diverse datasets that enable the model to generate 
+natural-language responses to user prompts. 
+(d) The term ‘‘national security system’’ has the same meaning as in 
+44 U.S.C. 3552(b)(6). 
+Sec. 3. Unbiased AI Principles. It is the policy of the United States to 
+promote the innovation and use of trustworthy AI. To advance that policy, 
+agency heads shall, consistent with applicable law and in consideration 
+VerDate Sep<11>2014 
+15:35 Jul 25, 2025
+Jkt 265001
+PO 00000
+Frm 00001
+Fmt 4790
+Sfmt 4790
+E:\FR\FM\28JYE1.SGM
+28JYE1
+khammond on DSK9W7S144PROD with PRESDOC2
+35390 
+Federal Register / Vol. 90, No. 142 / Monday, July 28, 2025 / Presidential Documents 
+of guidance issued pursuant to section 4 of this order, procure only those 
+LLMs developed in accordance with the following two principles (Unbiased 
+AI Principles): 
+(a) Truth-seeking. LLMs shall be truthful in responding to user prompts 
+seeking factual information or analysis. LLMs shall prioritize historical accu-
+racy, scientific inquiry, and objectivity, and shall acknowledge uncertainty 
+where reliable information is incomplete or contradictory. 
+(b) Ideological Neutrality. LLMs shall be neutral, nonpartisan tools that 
+do not manipulate responses in favor of ideological dogmas such as DEI. 
+Developers shall not intentionally encode partisan or ideological judgments 
+into an LLM’s outputs unless those judgments are prompted by or otherwise 
+readily accessible to the end user. 
+Sec. 4. Implementation. (a) Within 120 days of the date of this order, 
+the Director of the Office of Management and Budget (OMB), in consultation 
+with the Administrator for Federal Procurement Policy, the Administrator 
+of General Services, and the Director of the Office of Science and Technology 
+Policy, shall issue guidance to agencies to implement section 3 of this 
+order. That guidance shall: 
+(i) account for technical limitations in complying with this order; 
+(ii) permit vendors to comply with the requirement in the second Unbiased 
+AI Principle to be transparent about ideological judgments through disclo-
+sure of the LLM’s system prompt, specifications, evaluations, or other 
+relevant documentation, and avoid requiring disclosure of specific model 
+weights or other sensitive technical data where practicable; 
+(iii) avoid over-prescription and afford latitude for vendors to comply 
+with the Unbiased AI Principles and take different approaches to innova-
+tion; 
+(iv) specify factors for agency heads to consider in determining whether 
+to apply the Unbiased AI Principles to LLMs developed by the agencies 
+and to AI models other than LLMs; and 
+(v) make exceptions as appropriate for the use of LLMs in national security 
+systems. 
+(b) Each agency head shall, to the maximum extent consistent with applica-
+ble law: 
+(i) include in each Federal contract for an LLM entered into following 
+the date of the OMB guidance issued under subsection (a) of this section 
+terms requiring that the procured LLM comply with the Unbiased AI 
+Principles and providing that decommissioning costs shall be charged 
+to the vendor in the event of termination by the agency for the vendor’s 
+noncompliance with the contract following a reasonable period to cure; 
+(ii) to the extent practicable and consistent with contract terms, revise 
+existing contracts for LLMs to include the terms specified in subsection 
+(b)(i) of this section; and 
+(iii) within 90 days of the OMB guidance issued under subsection (a) 
+of this section, adopt procedures to ensure that LLMs procured by the 
+agency comply with the Unbiased AI Principles. 
+Sec. 5. General Provisions. (a) Nothing in this order shall be construed 
+to impair or otherwise affect: 
+(i) the authority granted by law to an executive department or agency, 
+or the head thereof; or 
+(ii) the functions of the Director of the Office of Management and Budget 
+relating to budgetary, administrative, or legislative proposals. 
+(b) This order shall be implemented consistent with applicable law and 
+subject to the availability of appropriations. 
+(c) This order is not intended to, and does not, create any right or benefit, 
+substantive or procedural, enforceable at law or in equity by any party 
+against the United States, its departments, agencies, or entities, its officers, 
+employees, or agents, or any other person. 
+VerDate Sep<11>2014 
+15:35 Jul 25, 2025
+Jkt 265001
+PO 00000
+Frm 00002
+Fmt 4790
+Sfmt 4790
+E:\FR\FM\28JYE1.SGM
+28JYE1
+khammond on DSK9W7S144PROD with PRESDOC2
+35391 
+Federal Register / Vol. 90, No. 142 / Monday, July 28, 2025 / Presidential Documents 
+(d) The costs for publication of this order shall be borne by the General 
+Services Administration. 
+THE WHITE HOUSE, 
+July 23, 2025. 
+[FR Doc. 2025–14217 
+Filed 7–25–25; 8:45 am] 
+Billing code 6820–61–P 
+VerDate Sep<11>2014 
+15:35 Jul 25, 2025
+Jkt 265001
+PO 00000
+Frm 00003
+Fmt 4790
+Sfmt 4790
+E:\FR\FM\28JYE1.SGM
+28JYE1
+Trump.EPS</GPH>
+khammond on DSK9W7S144PROD with PRESDOC2
+		 
+		  
+		  </div>
+         
+      
+          <div class="news-text-fade"></div>
+		  
+        </div>
+		<div class="news-gpt">
+          <div class="news-gpt-title">GPT summary</div>
+          <div>Purpose: Ensure reliable and unbiased AI outputs for Americans by preventing ideological bias, particularly from DEI-related content. Key provisions: - Banning biased AI systems promoting DEI narratives or other ideologies. - Requiring agencies to review and audit their AI models regularly. - Prohibiting manipulation of data to fit DEI agendas. - Ensuring transparency in how AI makes decisions. - Mandating the use of third-party auditors for compliance. Agencies involved: - General Services Administration (GSA) – responsible for publication costs. - The White House – as the issuing authority. Revokes/amends: No specific revocation or amendment is mentioned, but this order introduces a new policy restricting DEI-aligned AI systems in federal use. Policy impact: Neutral analysis This policy aims to ensure that AI used by the government provides accurate and unbiased information. It could lead to more transparency and accountability in how agencies utilize AI technologies.</div>
+        </div>
+        
+        
+        
+      </div>
+	  
+      <div class="news-card" onclick="toggleCard(this)">
+        <div class="news-header">
+          <div class="news-source">federal_register_orders</div>
+          <div class="news-timestamp">2025-07-30 12:06</div>
+        </div>
+		
+        
+        <h2 class="news-title">
+          
+            Ending Crime and Disorder on America's Streets  
+          
+        </h2>
+		
+		<div class="news-url" style="margin-bottom: 1.25em;">
+          <a href="https://www.govinfo.gov/content/pkg/FR-2025-07-29/pdf/2025-14391.pdf" target="_blank" style="color: #666; font-size: 0.9em; word-break: break-all;">
+            https://www.govinfo.gov/content/pkg/FR-2025-07-29/pdf/2025-14391.pdf
+          </a>
+        </div>
+
+       
+        <div class="news-text-container">
+          <div class="news-text">
+Presidential Documents
+35817 
+Federal Register 
+Vol. 90, No. 143 
+Tuesday, July 29, 2025 
+Title 3— 
+The President 
+Executive Order 14321 of July 24, 2025 
+Ending Crime and Disorder on America’s Streets 
+By the authority vested in me as President by the Constitution and the 
+laws of the United States of America, it is hereby ordered: 
+Section 1. Purpose and Policy. Endemic vagrancy, disorderly behavior, sud-
+den confrontations, and violent attacks have made our cities unsafe. The 
+number of individuals living on the streets in the United States on a single 
+night during the last year of the previous administration—274,224—was 
+the highest ever recorded. The overwhelming majority of these individuals 
+are addicted to drugs, have a mental health condition, or both. Nearly 
+two-thirds of homeless individuals report having regularly used hard drugs 
+like methamphetamines, cocaine, or opioids in their lifetimes. An equally 
+large share of homeless individuals reported suffering from mental health 
+conditions. The Federal Government and the States have spent tens of billions 
+of dollars on failed programs that address homelessness but not its root 
+causes, leaving other citizens vulnerable to public safety threats. 
+Shifting homeless individuals into long-term institutional settings for humane 
+treatment through the appropriate use of civil commitment will restore public 
+order. Surrendering our cities and citizens to disorder and fear is neither 
+compassionate to the homeless nor other citizens. My Administration will 
+take a new approach focused on protecting public safety. 
+Sec. 2. Restoring Civil Commitment. (a) The Attorney General, in consultation 
+with the Secretary of Health and Human Services, shall take appropriate 
+action to: 
+(i) seek, in appropriate cases, the reversal of Federal or State judicial 
+precedents and the termination of consent decrees that impede the United 
+States’ policy of encouraging civil commitment of individuals with mental 
+illness who pose risks to themselves or the public or are living on the 
+streets and cannot care for themselves in appropriate facilities for appro-
+priate periods of time; and 
+(ii) provide assistance to State and local governments, through technical 
+guidance, grants, or other legally available means, for the identification, 
+adoption, and implementation of maximally flexible civil commitment, 
+institutional treatment, and ‘‘step-down’’ treatment standards that allow 
+for the appropriate commitment and treatment of individuals with mental 
+illness who pose a danger to others or are living on the streets and 
+cannot care for themselves. 
+Sec. 3. Fighting Vagrancy on America’s Streets. (a) The Attorney General, 
+the Secretary of Health and Human Services, the Secretary of Housing and 
+Urban Development, and the Secretary of Transportation shall take immediate 
+steps to assess their discretionary grant programs and determine whether 
+priority for those grants may be given to grantees in States and municipalities 
+that actively meet the below criteria, to the maximum extent permitted 
+by law: 
+(i) enforce prohibitions on open illicit drug use; 
+(ii) enforce prohibitions on urban camping and loitering; 
+(iii) enforce prohibitions on urban squatting; 
+(iv) enforce, and where necessary, adopt, standards that address individuals 
+who are a danger to themselves or others and suffer from serious mental 
+illness or substance use disorder, or who are living on the streets and 
+VerDate Sep<11>2014 
+17:30 Jul 28, 2025
+Jkt 265001
+PO 00000
+Frm 00003
+Fmt 4705
+Sfmt 4790
+E:\FR\FM\29JYE0.SGM
+29JYE0
+khammond on DSK9W7S144PROD with PRESDOC
+35818 
+Federal Register / Vol. 90, No. 143 / Tuesday, July 29, 2025 / Presidential Documents 
+cannot care for themselves, through assisted outpatient treatment or by 
+moving them into treatment centers or other appropriate facilities via 
+civil commitment or other available means, to the maximum extent per-
+mitted by law; or 
+(v) substantially implement and comply with, to the extent required, the 
+registration and notification obligations of the Sex Offender Registry and 
+Notification Act, particularly in the case of registered sex offenders with 
+no fixed address, including by adequately mapping and checking the 
+location of homeless sex offenders. 
+(b) The Attorney General shall: 
+(i) ensure that homeless individuals arrested for Federal crimes are evalu-
+ated, consistent with 18 U.S.C. 4248, to determine whether they are sexu-
+ally dangerous persons and certified accordingly for civil commitment; 
+(ii) take all necessary steps to ensure the availability of funds under 
+the Emergency Federal Law Enforcement Assistance program to support, 
+as consistent with 34 U.S.C. 50101 et seq., encampment removal efforts 
+in areas for which public safety is at risk and State and local resources 
+are inadequate; 
+(iii) assess Federal resources to determine whether they may be directed 
+toward ensuring, to the extent permitted by law, that detainees with 
+serious mental illness are not released into the public because of a lack 
+of forensic bed capacity at appropriate local, State, and Federal jails or 
+hospitals; and 
+(iv) enhance requirements that prisons and residential reentry centers 
+that are under the authority of the Attorney General or receive funding 
+from the Attorney General require in-custody housing release plans and, 
+to the maximum extent practicable, require individuals to comply. 
+Sec. 4. Redirecting Federal Resources Toward Effective Methods of Addressing 
+Homelessness. (a) The Secretary of Health and Human Services shall take 
+appropriate action to: 
+(i) ensure that discretionary grants issued by the Substance Abuse and 
+Mental Health Services Administration for substance use disorder preven-
+tion, treatment, and recovery fund evidence-based programs and do not 
+fund programs that fail to achieve adequate outcomes, including so-called 
+‘‘harm reduction’’ or ‘‘safe consumption’’ efforts that only facilitate illegal 
+drug use and its attendant harm; 
+(ii) provide technical assistance to assisted outpatient treatment programs 
+for individuals with serious mental illness or addiction during and after 
+the civil commitment process focused on shifting such individuals off 
+of the streets and public programs and into private housing and support 
+networks; and 
+(iii) ensure that Federal funds for Federally Qualified Health Centers and 
+Certified Community Behavioral Health Clinics reduce rather than promote 
+homelessness by supporting, to the maximum extent permitted by law, 
+comprehensive services for individuals with serious mental illness and 
+substance use disorder, including crisis intervention services. 
+(b) The Attorney General shall prioritize available funding to support 
+the expansion of drug courts and mental health courts for individuals for 
+which such diversion serves public safety. 
+Sec. 5. Increasing Accountability and Safety in America’s Homelessness 
+Programs. (a) The Secretary of Health and Human Services and the Secretary 
+of Housing and Urban Development shall take appropriate actions to increase 
+accountability in their provision of, and grants awarded for, homelessness 
+assistance and transitional living programs. These actions shall include, 
+to the extent permitted by law, ending support for ‘‘housing first’’ policies 
+that deprioritize accountability and fail to promote treatment, recovery, and 
+self-sufficiency; increasing competition among grantees through broadening 
+the applicant pool; and holding grantees to higher standards of effectiveness 
+in reducing homelessness and increasing public safety. 
+VerDate Sep<11>2014 
+17:30 Jul 28, 2025
+Jkt 265001
+PO 00000
+Frm 00004
+Fmt 4705
+Sfmt 4790
+E:\FR\FM\29JYE0.SGM
+29JYE0
+khammond on DSK9W7S144PROD with PRESDOC
+35819 
+Federal Register / Vol. 90, No. 143 / Tuesday, July 29, 2025 / Presidential Documents 
+(b) The Secretary of Housing and Urban Development shall, as appropriate, 
+take steps to require recipients of Federal housing and homelessness assist-
+ance to increase requirements that persons participating in the recipients’ 
+programs who suffer from substance use disorder or serious mental illness 
+use substance abuse treatment or mental health services as a condition 
+of participation. 
+(c) With respect to recipients of Federal housing and homelessness assist-
+ance that operate drug injection sites or ‘‘safe consumption sites,’’ knowingly 
+distribute drug paraphernalia, or permit the use or distribution of illicit 
+drugs on property under their control: 
+(i) the Attorney General shall review whether such recipients are in viola-
+tion of Federal law, including 21 U.S.C. 856, and bring civil or criminal 
+actions in appropriate cases; and 
+(ii) the Secretary of Housing and Urban Development, in coordination 
+with the Attorney General, shall review whether such recipients are in 
+violation of the terms of the programs pursuant to which they receive 
+Federal housing and homelessness assistance and freeze their assistance 
+as appropriate. 
+(d) The Secretary of Housing and Urban Development shall take appropriate 
+measures and revise regulations as necessary to allow, where permissible 
+under applicable law, federally funded programs to exclusively house women 
+and children and to stop sex offenders who receive homelessness assistance 
+through such programs from being housed with unrelated children. 
+(e) The Secretary of Housing and Urban Development, in consultation 
+with the Attorney General and the Secretary of Health and Human Services, 
+shall, as appropriate and to the extent permitted by law: 
+(i) allow or require the recipients of Federal funding for homelessness 
+assistance to collect health-related information that the Secretary of Hous-
+ing and Urban Development identifies as necessary to the effective and 
+efficient operation of the funding program from all persons to whom 
+such assistance is provided; and 
+(ii) require those funding recipients to share such data with law enforce-
+ment authorities in circumstances permitted by law and to use the collected 
+health data to provide appropriate medical care to individuals with mental 
+health diagnoses or to connect individuals to public health resources. 
+Sec. 6. General Provisions. (a) Nothing in this order shall be construed 
+to impair or otherwise affect: 
+(i) the authority granted by law to an executive department or agency, 
+or the head thereof; or 
+(ii) the functions of the Director of the Office of Management and Budget 
+relating to budgetary, administrative, or legislative proposals. 
+(b) This order shall be implemented consistent with applicable law and 
+subject to the availability of appropriations. 
+(c) This order is not intended to, and does not, create any right or benefit, 
+substantive or procedural, enforceable at law or in equity by any party 
+against the United States, its departments, agencies, or entities, its officers, 
+employees, or agents, or any other person. 
+VerDate Sep<11>2014 
+17:30 Jul 28, 2025
+Jkt 265001
+PO 00000
+Frm 00005
+Fmt 4705
+Sfmt 4790
+E:\FR\FM\29JYE0.SGM
+29JYE0
+khammond on DSK9W7S144PROD with PRESDOC
+35820 
+Federal Register / Vol. 90, No. 143 / Tuesday, July 29, 2025 / Presidential Documents 
+(d) The costs for publication of this order shall be borne by the Department 
+of Housing and Urban Development. 
+THE WHITE HOUSE, 
+July 24, 2025. 
+[FR Doc. 2025–14391 
+Filed 7–28–25; 11:15 am] 
+Billing code 4210–67–P 
+VerDate Sep<11>2014 
+17:30 Jul 28, 2025
+Jkt 265001
+PO 00000
+Frm 00006
+Fmt 4705
+Sfmt 4790
+E:\FR\FM\29JYE0.SGM
+29JYE0
+Trump.EPS</GPH>
+khammond on DSK9W7S144PROD with PRESDOC
+		 
+		  
+		  </div>
+         
+      
+          <div class="news-text-fade"></div>
+		  
+        </div>
+		<div class="news-gpt">
+          <div class="news-gpt-title">GPT summary</div>
+          <div>Purpose: The Executive Order aims to address crime and disorder on American streets by focusing on reducing homelessness and related issues through federal initiatives. Key Provisions: 1. **Homelessness Reduction**: Targets individuals experiencing homelessness due to drug addiction, mental health conditions, or other factors contributing to their situation. 2. **Public Safety Focus**: Aims to enhance public safety by addressing disorderly behavior and sudden confrontations linked to homelessness. 3. **Coordinated Federal Response**: Involves federal agencies in providing resources and services to support homeless individuals while ensuring legal compliance and funding availability. 4. **Legal Exclusions**: Clarifies that the order does not create enforceable rights against the U.S., its departments, or entities. 5. **Publication Costs**: Assigns responsibility for publication costs to the Department of Housing and Urban Development (HUD). Agencies Involved: - Department of Housing and Urban Development (HUD) - Other federal agencies supporting homelessness prevention and public safety initiatives. Revokes/Amends: None explicitly mentioned in the text. Policy Impact: The order likely leads to increased focus on addressing systemic issues contributing to homelessness, potentially improving public safety but requiring allocation of resources that may vary based on implementation strategies.</div>
+        </div>
+        
+        
+        
+      </div>	  
+      
+    </div>
+
+    <div class="column2">
+		<div class="control-panel">
+		  <h3 class="control-title">Feed management</h3>
+		  
+		  <label for="template" style="font-size: 1.3em; display: block; margin-bottom: 0.625em;">Select a template:</label>
+		  <select name="template" id="template">
+			<option value="usa_gov.html">deep-dive\usa_gov.yaml</option>
+			<option value="who_health_alerts.html">deep-dive\who_health_alerts.yaml</option>
+		  </select>
+		  
+		  <button id="runButton" class="button-run">Start data collection</button>
+		  
+		  <div class="stats">
+			<div><strong>Event total:</strong> 154</div>
+			<div><strong>Last update:</strong> 2025-07-30 14:15</div>
+		  </div>
+		</div>
+    </div>
+  </div>
+
+	<script>
+	document.getElementById('runButton').addEventListener('click', function() {
+	  const selectedTemplate = document.getElementById('template').value;
+	  window.location.href = selectedTemplate;
+	});
+	</script>
+
+  <script>
+    function toggleCard(card) {
+      card.classList.toggle('expanded');
+    }
+
+    // Обработчик масштабирования
+    let touchStartDistance = 0;
+    let currentScale = 1;
+    const maxScale = 3;
+    const minScale = 0.8;
+    const html = document.documentElement;
+
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        touchStartDistance = getDistance(e.touches[0], e.touches[1]);
+      }
+    }, false);
+
+    document.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const touchEndDistance = getDistance(e.touches[0], e.touches[1]);
+        const scale = touchEndDistance / touchStartDistance;
+        
+        currentScale *= scale;
+        currentScale = Math.max(minScale, Math.min(maxScale, currentScale));
+        
+        document.documentElement.style.setProperty('--scale-factor', currentScale);
+        touchStartDistance = touchEndDistance;
+      }
+    }, { passive: false });
+
+    function getDistance(touch1, touch2) {
+      const dx = touch1.clientX - touch2.clientX;
+      const dy = touch1.clientY - touch2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+  </script>
+
+<img src="demo_files/mouseover.png" id="link_preview_icon" style="visibility: hidden; left: 1434px; top: 438px;"><div id="lprv_frame" style="visibility: hidden;">
+          <div class="lprv_toolbar">
+            <div id="logo"></div>
+            <div class="lprv_btn_group">
+              <button class="lprv_btn" id="back" title="Back"></button>
+              <button class="lprv_btn" id="forward" title="Forward"></button>
+            </div>
+            <div class="lprv_btn_group">
+              <button class="lprv_btn" id="open_tab" title="Open in new tab"></button>
+            </div>
+            <div class="lprv_btn_group" id="pin">
+              <button class="lprv_btn" id="push-pin" title="Keep preview frame open"></button>
+              <button class="lprv_btn" id="hide" title="Hide preview frame"></button>
+            </div>
+          </div>
+          <div id="lprv_vresize"></div>
+          <iframe id="lprv_content"></iframe>
+        </div></body></html>

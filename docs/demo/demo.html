@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <link rel="icon" href="http://127.0.0.1:5000/static/favicon.ico">
+  <title>All you need in one feed — Rostral.io</title>
+  <style>
+    :root {
+      --base-font-size: 22px;
+      --scale-factor: 1;
+    }
+    
+    .header-brand {
+      padding: 1.5em 2em 1em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+   }
+    .logo-img {
+      height: 2.8em;
+      width: auto;
+      transition: transform 0.2s;
+    }
+    .logo-img:hover {
+      transform: scale(1.05);
+    }
+    .logo-text {
+      font-size: 1.8em;
+      font-weight: 700;
+      color: #352909;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+    .logo-tagline {
+      font-size: 1.1em;
+      color: #666;
+      margin-top: 0.3em;
+    }
+
+    .github-link {
+      font-size: 1.2em;
+      color: #666;
+      text-decoration: none;
+      margin-left: auto;
+      padding: 0 1em;
+      transition: color 0.2s;
+    }
+    
+    .github-link:hover {
+      color: #D9AB35;
+      text-decoration: underline;
+    }
+
+    body { 
+      margin: 0; 
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+      background-color: #f5f5f5; 
+      color: #333;
+      font-size: calc(var(--base-font-size) * var(--scale-factor));
+      line-height: 1.6;
+    }
+    
+    * { 
+      box-sizing: border-box;
+    }
+    
+    .row { display: flex; flex-wrap: wrap; }
+    .column1 { flex: 70%; padding: 1.5em; }
+    .column2 { flex: 30%; padding: 1.5em; }
+    
+    .news-card {
+      background-color: white;
+      padding: 2em;
+      margin-bottom: 2em;
+      border-radius: 0.625em;
+      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .news-card:hover {
+      transform: translateY(-0.1875em);
+      box-shadow: 0 0.375em 1em rgba(0,0,0,0.15);
+    }
+    
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25em;
+      padding-bottom: 0.9375em;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .news-source {
+      font-size: 1.3em;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    .news-timestamp {
+      font-size: 1.2em;
+      color: #888;
+    }
+    
+    .news-title {
+      font-size: 2em;
+      font-weight: 600;
+      margin-bottom: 1.25em;
+      color: #222;
+      line-height: 1.3;
+    }
+    
+    .news-summary {
+      line-height: 1.7;
+      margin-bottom: 1.25em;
+      color: #444;
+      font-size: 1.3em;
+    }
+    
+    .news-text-container {
+      position: relative;
+      max-height: 30em; /* Примерная высота для 1000 символов */
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .news-text {
+      padding: 1.25em;
+      background-color: #f9f9f9;
+      border-radius: 0.375em;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-size: 1.3em;
+    }
+    
+    .news-text-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4em;
+      background: linear-gradient(to bottom, rgba(249,249,249,0), rgba(249,249,249,1));
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .news-card.expanded .news-text-container {
+      max-height: none;
+    }
+    
+    .news-card.expanded .news-text-fade {
+      opacity: 0;
+    }
+    
+    .news-gpt {
+      background-color: #f8f9fa;
+      border-left: 0.3125em solid #D9AB35;
+      padding: 1.25em;
+      margin: 1.5625em 0;
+      border-radius: 0 0.375em 0.375em 0;
+      font-size: 1.3em;
+    }
+    
+    .news-gpt-title {
+      font-weight: 600;
+      color: #352909;
+      margin-bottom: 0.75em;
+      font-size: 1.4em;
+    }
+    
+    .control-panel {
+      background-color: white;
+      padding: 2em;
+      border-radius: 0.625em;
+      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
+      position: sticky;
+      top: 1.25em;
+    }
+    
+    .control-title {
+      font-size: 1.8em;
+      font-weight: 600;
+      margin-bottom: 1.5625em;
+      color: #222;
+    }
+    
+    select, .button-run {
+      width: 100%;
+      padding: 0.75em 0.9375em;
+      margin-bottom: 1.25em;
+      border: 1px solid #ddd;
+      border-radius: 0.375em;
+      font-size: 1.3em;
+    }
+    
+    .button-run {
+      background-color: #352909;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 1.3em;
+      padding: 0.9375em;
+    }
+    
+    .button-run:hover {
+      background-color: #5a4a1a;
+    }
+    
+    .stats {
+      font-size: 1.3em;
+      color: #666;
+      margin-top: 1.5625em;
+      line-height: 1.7;
+    }
+    
+    @media screen and (max-width: 768px) {
+      :root {
+        --base-font-size: 18px;
+      }
+      
+      .row { flex-direction: column; }
+      .column1, .column2 { flex: 100%; padding: 1em; }
+      .control-panel { position: static; }
+      .news-title {
+        font-size: 1.7em;
+      }
+      .github-link {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-brand">
+    <a href="https://github.com/alfablend/rostral.io/" target="_blank" style="text-decoration: none; color: inherit;">
+  <div class="logo-container">
+    <img src="demo_files/rostral_logo.png" alt="Rostral.io" class="logo-img">
+    <div>
+      <div class="logo-text">rostral.io</div>
+      <div class="logo-tagline">All you need in one feed</div>
+    </div>
+  </div>
+</a>
+
+ <a href="https://github.com/alfablend/rostral.io/issues/new" class="github-link" target="_blank">
+      🛠 Report an issue (GitHub Issues)
+    </a>
+    </div>
+    
+   
+    
+  </div>
+
+  <div class="row">
+    <div class="column1">
+      
+      <div class="news-card" onclick="toggleCard(this)">
+        <div class="news-header">
+          <div class="news-source">Simulation mode</div>
+          <div class="news-timestamp">2025-07-30 14:15</div>
+        </div>
+        
+        <h2 class="news-title">
+          
+            Welcome to the Rostral.io demonstration
+          
+        </h2>
+
+       
+        <div class="news-text-container">
+          <div class="news-text">
+(Click to expand/collapse the full text)		  
+		  
+Rostral.io is a monitoring system that automatically downloads new PDF documents, HTML pages, and JSON entries from your favorite sites, generates GPT summaries, and stores everything in one convenient feed. It can also translate international sources.
+
+What you see now is not a real installation but a simulation. The data is not collected in real time—instead, pre-saved examples are used. However, you can test the interface and user experience.
+How to use it:
+
+Select one of the monitoring templates in the right panel.
+
+Click "Start data collection".
+
+You will see sample fetched events and GPT summaries.
+
+If you like Rostral.io, you can deploy it locally.
+Thank you for your interest!
+		 
+		  
+		  </div>
+         
+      
+          <div class="news-text-fade"></div>
+		  
+        </div>
+		<div class="news-gpt">
+          <div class="news-gpt-title">GPT summary</div>
+          <div>GPT summary will appear here. To begin: select a template from the right panel and click 'Start data collection'.</div>
+        </div>
+        
+        
+        
+      </div>
+      
+    </div>
+
+    <div class="column2">
+		<div class="control-panel">
+		  <h3 class="control-title">Feed management</h3>
+		  
+		  <label for="template" style="font-size: 1.3em; display: block; margin-bottom: 0.625em;">Select a template:</label>
+		  <select name="template" id="template">
+			<option value="deep-dive/usa_gov.html">deep-dive\usa_gov.yaml</option>
+			<option value="deep-dive/who_health_alerts.html">deep-dive\who_health_alerts.yaml</option>
+		  </select>
+		  
+		  <button id="runButton" class="button-run">Start data collection</button>
+		  
+		  <div class="stats">
+			<div><strong>Event total:</strong> 154</div>
+			<div><strong>Last update:</strong> 2025-07-30 14:15</div>
+		  </div>
+		</div>
+    </div>
+  </div>
+
+	<script>
+	document.getElementById('runButton').addEventListener('click', function() {
+	  const selectedTemplate = document.getElementById('template').value;
+	  window.location.href = selectedTemplate;
+	});
+	</script>
+
+  <script>
+    function toggleCard(card) {
+      card.classList.toggle('expanded');
+    }
+
+    // Обработчик масштабирования
+    let touchStartDistance = 0;
+    let currentScale = 1;
+    const maxScale = 3;
+    const minScale = 0.8;
+    const html = document.documentElement;
+
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        touchStartDistance = getDistance(e.touches[0], e.touches[1]);
+      }
+    }, false);
+
+    document.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const touchEndDistance = getDistance(e.touches[0], e.touches[1]);
+        const scale = touchEndDistance / touchStartDistance;
+        
+        currentScale *= scale;
+        currentScale = Math.max(minScale, Math.min(maxScale, currentScale));
+        
+        document.documentElement.style.setProperty('--scale-factor', currentScale);
+        touchStartDistance = touchEndDistance;
+      }
+    }, { passive: false });
+
+    function getDistance(touch1, touch2) {
+      const dx = touch1.clientX - touch2.clientX;
+      const dy = touch1.clientY - touch2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+  </script>
+
+<img src="demo_files/mouseover.png" id="link_preview_icon" style="visibility: hidden; left: 1434px; top: 438px;"><div id="lprv_frame" style="visibility: hidden;">
+          <div class="lprv_toolbar">
+            <div id="logo"></div>
+            <div class="lprv_btn_group">
+              <button class="lprv_btn" id="back" title="Back"></button>
+              <button class="lprv_btn" id="forward" title="Forward"></button>
+            </div>
+            <div class="lprv_btn_group">
+              <button class="lprv_btn" id="open_tab" title="Open in new tab"></button>
+            </div>
+            <div class="lprv_btn_group" id="pin">
+              <button class="lprv_btn" id="push-pin" title="Keep preview frame open"></button>
+              <button class="lprv_btn" id="hide" title="Hide preview frame"></button>
+            </div>
+          </div>
+          <div id="lprv_vresize"></div>
+          <iframe id="lprv_content"></iframe>
+        </div></body></html>

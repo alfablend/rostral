@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <link rel="icon" href="http://127.0.0.1:5000/static/favicon.ico">
+  <title>All you need in one feed — Rostral.io</title>
+  <style>
+    :root {
+      --base-font-size: 22px;
+      --scale-factor: 1;
+    }
+    
+    .header-brand {
+      padding: 1.5em 2em 1em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f5f5f5;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+   }
+    .logo-img {
+      height: 2.8em;
+      width: auto;
+      transition: transform 0.2s;
+    }
+    .logo-img:hover {
+      transform: scale(1.05);
+    }
+    .logo-text {
+      font-size: 1.8em;
+      font-weight: 700;
+      color: #352909;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+    .logo-tagline {
+      font-size: 1.1em;
+      color: #666;
+      margin-top: 0.3em;
+    }
+
+    .github-link {
+      font-size: 1.2em;
+      color: #666;
+      text-decoration: none;
+      margin-left: auto;
+      padding: 0 1em;
+      transition: color 0.2s;
+    }
+    
+    .github-link:hover {
+      color: #D9AB35;
+      text-decoration: underline;
+    }
+
+    body { 
+      margin: 0; 
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+      background-color: #f5f5f5; 
+      color: #333;
+      font-size: calc(var(--base-font-size) * var(--scale-factor));
+      line-height: 1.6;
+    }
+    
+    * { 
+      box-sizing: border-box;
+    }
+    
+    .row { display: flex; flex-wrap: wrap; }
+    .column1 { flex: 70%; padding: 1.5em; }
+    .column2 { flex: 30%; padding: 1.5em; }
+    
+    .news-card {
+      background-color: white;
+      padding: 2em;
+      margin-bottom: 2em;
+      border-radius: 0.625em;
+      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .news-card:hover {
+      transform: translateY(-0.1875em);
+      box-shadow: 0 0.375em 1em rgba(0,0,0,0.15);
+    }
+    
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25em;
+      padding-bottom: 0.9375em;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .news-source {
+      font-size: 1.3em;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    .news-timestamp {
+      font-size: 1.2em;
+      color: #888;
+    }
+    
+    .news-title {
+      font-size: 2em;
+      font-weight: 600;
+      margin-bottom: 1.25em;
+      color: #222;
+      line-height: 1.3;
+    }
+    
+    .news-summary {
+      line-height: 1.7;
+      margin-bottom: 1.25em;
+      color: #444;
+      font-size: 1.3em;
+    }
+    
+    .news-text-container {
+      position: relative;
+      max-height: 30em; /* Примерная высота для 1000 символов */
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .news-text {
+      padding: 1.25em;
+      background-color: #f9f9f9;
+      border-radius: 0.375em;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-size: 1.3em;
+    }
+    
+    .news-text-fade {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4em;
+      background: linear-gradient(to bottom, rgba(249,249,249,0), rgba(249,249,249,1));
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .news-card.expanded .news-text-container {
+      max-height: none;
+    }
+    
+    .news-card.expanded .news-text-fade {
+      opacity: 0;
+    }
+    
+    .news-gpt {
+      background-color: #f8f9fa;
+      border-left: 0.3125em solid #D9AB35;
+      padding: 1.25em;
+      margin: 1.5625em 0;
+      border-radius: 0 0.375em 0.375em 0;
+      font-size: 1.3em;
+    }
+    
+    .news-gpt-title {
+      font-weight: 600;
+      color: #352909;
+      margin-bottom: 0.75em;
+      font-size: 1.4em;
+    }
+    
+    .control-panel {
+      background-color: white;
+      padding: 2em;
+      border-radius: 0.625em;
+      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
+      position: sticky;
+      top: 1.25em;
+    }
+    
+    .control-title {
+      font-size: 1.8em;
+      font-weight: 600;
+      margin-bottom: 1.5625em;
+      color: #222;
+    }
+    
+    select, .button-run {
+      width: 100%;
+      padding: 0.75em 0.9375em;
+      margin-bottom: 1.25em;
+      border: 1px solid #ddd;
+      border-radius: 0.375em;
+      font-size: 1.3em;
+    }
+    
+    .button-run {
+      background-color: #352909;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 1.3em;
+      padding: 0.9375em;
+    }
+    
+    .button-run:hover {
+      background-color: #5a4a1a;
+    }
+    
+    .stats {
+      font-size: 1.3em;
+      color: #666;
+      margin-top: 1.5625em;
+      line-height: 1.7;
+    }
+    
+    @media screen and (max-width: 768px) {
+      :root {
+        --base-font-size: 18px;
+      }
+      
+      .row { flex-direction: column; }
+      .column1, .column2 { flex: 100%; padding: 1em; }
+      .control-panel { position: static; }
+      .news-title {
+        font-size: 1.7em;
+      }
+      .github-link {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-brand">
+    <a href="https://github.com/alfablend/rostral.io/" target="_blank" style="text-decoration: none; color: inherit;">
+  <div class="logo-container">
+    <img src="../demo_files/rostral_logo.png" alt="Rostral.io" class="logo-img">
+    <div>
+      <div class="logo-text">rostral.io</div>
+      <div class="logo-tagline">All you need in one feed</div>
+    </div>
+  </div>
+</a>
+    
+    <a href="https://github.com/alfablend/rostral.io/issues/new" class="github-link" target="_blank">
+      🛠 Report an issue (GitHub Issues)
+    </a>
+    
+    <div class="news-timestamp" style="font-size: 1.1em; color: #888;">
+      2025-07-30
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="column1">
+      
+	  <div class="news-card" onclick="toggleCard(this)">
+        <div class="news-header">
+          <div class="news-source">who_monitor</div>
+          <div class="news-timestamp">2025-07-31 19:10</div>
+        </div>
+		
+        
+        <h2 class="news-title">
+          
+            Global hunger declines, but rises in Africa and western Asia: UN report 
+          
+        </h2>
+		
+		<div class="news-url" style="margin-bottom: 1.25em;">
+          <a href="https://www.who.int/news/item/28-07-2025-global-hunger-declines-but-rises-in-africa-and-western-asia-un-report " target="_blank" style="color: #666; font-size: 0.9em; word-break: break-all;">
+            https://www.who.int/news/item/28-07-2025-global-hunger-declines-but-rises-in-africa-and-western-asia-un-report 
+          </a>
+        </div>
+
+       
+        <div class="news-text-container">
+          <div class="news-text">
+An estimated 8.2 percent of the global population, or about 673 million people, experienced hunger in 2024, down from 8.5 percent in 2023 and 8.7 percent in 2022. However, progress was not consistent across the globe, as hunger continued to rise in most subregions of Africa and western Asia, according to this year’sThe State of Food Security and Nutrition in the World(SOFI 2025) report published today by five specialized agencies of the United Nations.Launched during the Second UN Food Systems Summit Stocktake (UNFSS+4) in Addis Ababa, SOFI 2025 indicates that between 638 and 720 million people faced hunger in 2024. Based on the point estimate* of 673 million, this represents a decrease of 15 million people from 2023 and of 22 million from 2022.While the decline is welcome, the latest estimates remain above pre-pandemic levels, with the high food inflation of recent years contributing to the slow recovery in food security.Notable improvements are seen in southern Asia and Latin America. The prevalence of undernourishment (PoU) in Asia fell from 7.9 percent in 2022 to 6.7 percent, or 323 million people, in 2024. Additionally, Latin America and the Caribbean as a region saw the PoU fall to 5.1 percent, or 34 million people, in 2024, down from a peak of 6.1 percent in 2020.Unfortunately, this positive trend contrasts sharply with the steady rise in hunger across Africa and western Asia, including in many countries affected by prolonged food crises. The proportion of the population facing hunger in Africa surpassed 20 percent in 2024, affecting 307 million people, while in western Asia an estimated 12.7 percent of the population, or more than 39 million people, may have faced hunger in 2024.It is projected that 512 million people could be chronically undernourished by 2030. Almost 60 percent of those will be in Africa. This highlights the immense challenge of achieving SDG 2 (Zero Hunger), warned the Food and Agriculture Organization of the United Nations (FAO), the International Fund for Agricultural Development (IFAD), the United Nations agency for children (UNICEF), the UN World Food Programme (WFP), and the World Health Organization (WHO).Tracking nutrition targetsFrom 2023 to 2024, the global prevalence of moderate or severe food insecurity – an assessment registering the experience of constraints on access to adequate food during part of the year – decreased slightly, from 28.4 to 28.0 percent, accounting for 2.3 billion people. This is 335 million more than in 2019, before the COVID-19 pandemic, and 683 million more than in 2015, when the Sustainable Development Agenda was adopted.Among the indicators of child nutrition, the prevalence of stunting in children under five declined from 26.4 percent in 2012 to 23.2 percent in 2024, reflecting global progress.The prevalence of child overweight (5.3 percent in 2012 and 5.5 percent in 2024), and in child wasting (7.4 percent in 2012 and 6.6 percent in 2024) remains largely unchanged.The percentage of infants under six months exclusively breastfed increased significantly, from 37.0 percent in 2012 to 47.8 percent in 2023, reflecting growing recognition of its health benefits.The prevalence of adult obesity rose from 12.1 percent in 2012 to 15.8 percent in 2022.New data show an increase in the global prevalence of anaemia among women aged 15 to 49, from 27.6 percent in 2012 to 30.7 percent in 2023.Estimates for a new SDG indicator introduced in the report reveal that about one-third of children aged 6 to 23 months and two-thirds of women aged 15 to 49 years met minimum dietary diversity.Food inflationSOFI 2025 also examines the causes and consequences of the 2021–2023 food price surge and its impact on food security and nutrition.The report highlights that the global policy response to the COVID-19 pandemic – characterized by extensive fiscal and monetary interventions – combined with the impacts of the war in Ukraine and extreme weather events, contributed to recent inflationary pressures.This food price inflation has hindered the post-pandemic recovery in food security and nutrition. Since 2020, global food price inflation has consistently outpaced headline inflation. The gap peaked in January 2023, with food inflation reaching 13.6 percent, 5.1 percentage points above the headline rate of 8.5 percent.Low-income countries have been particularly hit hard by rising food prices. While median global food price inflation increased from 2.3 percent in December 2020 to 13.6 percent in early 2023, it climbed even higher in low-income countries, peaking at 30 percent in May 2023.Despite rising global food prices, the number of people unable to afford a healthy diet fell from 2.76 billion in 2019 to 2.60 billion in 2024. However, the improvement was uneven. In low-income countries, where the cost of a healthy diet rose more sharply than in higher-income countries, the number of people unable to afford a healthy diet increased from 464 million in 2019 to 545 million in 2024. In lower-middle-income countries (excluding India), the number rose from 79 million in 2019 to 869 million over the same period.The report recommends a combination of policy responses to food price inflation. They include targeted and time-bound fiscal measures, such as social protection programs, to safeguard vulnerable households; credible and transparent monetary policies to contain inflationary pressures; and strategic investments in agrifood R&D, transport and production infrastructure, and market information systems to improve productivity and resilience.What they saidFAO Director-General, QU Dongyu:“While it is encouraging to see a decrease in the global hunger rate, we must recognize that progress is uneven. SOFI 2025 serves as a critical reminder that we need to intensify efforts to ensure that everyone has access to sufficient, safe, and nutritious food. To achieve this, we must work collaboratively and innovatively with governments, organizations, and communities to address the specific challenges faced by vulnerable populations, especially in regions where hunger remains persistent.”IFAD President, Alvaro Lario:“In times of rising food prices and disrupted global value chains, we must step up our investments in rural and agricultural transformation. These investments are not only essential for ensuring food and nutrition security – they are also critical for global stability.”UNICEF Executive Director, Catherine Russell:“Every child deserves the chance to grow and thrive. Yet over 190 million children under the age of 5 are affected by undernutrition, which can have negative consequences for their physical and mental development. This robs them of the chance to live to their fullest potential. The State of Food Security and Nutrition in the World report for 2025 underscores the need to act urgently for the world’s youngest and most vulnerable children, as rising food prices could deepen nutrition insecurity for millions of families. We must work in collaboration with governments, the private sector and communities themselves to ensure that vulnerable families have access to food that is affordable and with adequate nutrition for children to develop. That includes strengthening social protection programs and teaching parents about locally produced nutritious food for children, including the importance of breastfeeding, which provides the best start to a baby’s life.WFP Executive Director, Cindy McCain:“Hunger remains at alarming levels, yet the funding needed to tackle it is falling. Last year, WFP reached 124 million people with lifesaving food assistance. This year, funding cuts of up to 40 percent mean that tens of millions of people will lose the vital lifeline we provide. While the small reduction in overall rates of food insecurity is welcome, the continued failure to provide critical aid to people in desperate need will soon wipe out these hard-won gains, sparking further instability in volatile regions of the world.”WHO Director-General, Dr Tedros Adhanom Ghebreyesus:"In recent years, the world has made good progress in reducing stunting and supporting exclusive breastfeeding, but there is still much to be done to relieve millions of people from the burdens of food insecurity and malnutrition. This report provides encouraging news, but also shows where the gaps are and who is being left behind, and where we must direct our efforts to ensure that everyone has access to a healthy and nutritious diet."*The point estimate is the value considered to be more likely among those included in the range of possible values given the information on which the estimate is based.
+		 
+		  
+		  </div>
+         
+      
+          <div class="news-text-fade"></div>
+		  
+        </div>
+		<div class="news-gpt">
+          <div class="news-gpt-title">GPT summary</div>
+          <div>*Summary of WHO Health Alert:** - **Type of outbreak or event:** Famine alert due to severe food insecurity and malnutrition. - **Region(s) and country affected:** Gaza Strip, Palestine. - **Severity:** - Confirmed cases: Widespread starvation and malnutrition leading to a rise in hunger-related deaths. - Deaths reported: Significant increase in mortality linked to acute malnutrition. - Urgency: Critical situation with Famine thresholds met for food consumption and acute malnutrition levels in Gaza City. - **Recommended actions:** - Cease hostilities to allow humanitarian access. - Ensure protection of civilians, aid workers, and critical infrastructure. - Restore life-saving services and multi-sectoral assistance safely. - Facilitate the flow of commercial goods and local production capacities.</div>
+        </div>
+        
+        
+        
+      </div>
+	  
+      <div class="news-card" onclick="toggleCard(this)">
+        <div class="news-header">
+          <div class="news-source">who_monitor</div>
+          <div class="news-timestamp">2025-07-31 18:46</div>
+        </div>
+		
+        
+        <h2 class="news-title">
+          
+            Paying tribute to David Nabarro 
+          
+        </h2>
+		
+		<div class="news-url" style="margin-bottom: 1.25em;">
+          <a href="https://www.who.int/news/item/30-07-2025-paying-tribute-to-david-nabarro" target="_blank" style="color: #666; font-size: 0.9em; word-break: break-all;">
+            https://www.who.int/news/item/30-07-2025-paying-tribute-to-david-nabarro 
+          </a>
+        </div>
+
+       
+        <div class="news-text-container">
+          <div class="news-text">
+It is with great sadness that the World Health Organization mourns the passing of Dr David Nabarro on Friday 25 July at his home. He was 75. At WHO, David was at the forefront of multiple areas of work, including malaria control, humanitarian crisis response and outbreaks. Most recently, David served as a WHO Special Envoy on COVID-19. To all who knew him, David was a widely respected, impactful and loved champion of health, equity and disadvantaged people worldwide, who supported many in their career development with his vision, skill, compassion and patience.In a statement, WHO Director-General Dr Tedros Adhanom Ghebreyesus said he was “Deeply shocked and saddened by the passing of our dear friend, colleague and WHO Envoy David Nabarro. David was a great champion of global health and health equity, and a wise, generous mentor to countless individuals. His work touched and impacted so many lives across the world. On behalf of WHO, I’m extending our heartfelt condolences to David’s family, friends and colleagues. Rest in peace, my dear friend. We will dearly miss your expertise, wisdom and kindness.”David wore many hats, reflecting his expertise, energy and readiness to help across a wide range of sectors, including health, nutrition and climate change.From 1999-2005, David held senior leadership positions at WHO, starting as the Executive Director responsible for the Roll Back Malaria Project and the Office of the Director-General, before being appointed the Director-General’s Special Representative for Health Action in Crises.In 2005, he joined the United Nations, serving as UN System Senior Coordinator for Avian and Pandemic Influenza (2005-2014), the UN Secretary-General’s Special Representative for Food Security and Nutrition (2008-2014), Coordinator of the Movement for Scaling Up Nutrition (2011-2014, as Assistant Secretary-General), the UN SG’s Special Envoy for the West Africa Ebola Outbreak Response (2014-2015), and Special Adviser for the 2030 Agenda for Sustainable Development and Climate Change (2016 - 2017, as Under-Secretary-General).In 2015, the WHO Director-General appointed David as chair of the expert group on the reform of WHO’s work on outbreaks and emergencies in 2015.In October 2018, he received the World Food Prize for leadership on nutrition.David was Co-Director (from mid-2019-2025) and Chair of Global Health at the Institute of Global Health Innovation, Imperial College, London. He also founded and was Strategic Director of the Swiss-based 4SD Foundation (Skills Systems and Synergies for Sustainable Development) with Florence Lasbennes in 2018, training and mentoring leaders for sustainable development.Between 2018 and 2025, David curated the Food Systems Dialogues as a contribution to the transformation of food systems. He also contributed to preparations for the UN’s September 2019 Climate Action Summit and co-facilitated the coalition that advanced the Nature-Based Solutions (NBS) workstream (co-led by China and New Zealand). David co-chaired the forum on Climate Change and Health that completed its work at the World Innovation Summit for Health in November 2020.In March 2020, David was appointed Special Envoy of WHO Director General on COVID-19, a position that he held until his passing on 25 July 2025. Under his strategic leadership, 4SD led the Summit Dialogues that contributed to the 2021 UN Food Systems Summit from which a network of National Convenors of Food Systems transformation has emerged and continues to be active today.When the Ukraine war began, David joined the UN Secretary-General's Food, Energy and Finance crisis response group, co-leading the Food Workstream. King Charles III knighted David in 2023 for his contributions to global health.In astatementtitled “A Difficult Announcement,” the4SD Foundationsaid David passed at his home on Friday 25 July.“David’s generosity and unwavering commitment to improve the lives of others will be sorely missed. He leaves behind his beloved wife, Flo, his children, Tom, Ollie, Polly, Josie, Lucas and seven grandchildren. The family is comforted by the support and compassion extended to them as they navigate this difficult time,” the statement said.On 30 July, David’s family issued a statement saying: “We are deeply grateful for the outpouring of tributes to David, and for the kindness to all who mourn his passing. Across the fields of international development, especially public health, food systems transformation, nutrition and crisis response, we are proud to see how his legacy will continue through so many compassionate leaders working to shift systems from within.”A small, private funeral will be held with close family on Monday 4 August. In the weeks ahead, a number of memorial services will take place to enable those whose lives David has touched to pay their respects.Memorial web page to leave messages, memories and mementosUpdates on further arrangements
+		 
+		  
+		  </div>
+         
+      
+          <div class="news-text-fade"></div>
+		  
+        </div>
+		<div class="news-gpt">
+          <div class="news-gpt-title">GPT summary</div>
+          <div>The World Health Organization (WHO) mourns the passing of Dr David Nabarro at age 75. He served as a WHO Special Envoy on COVID-19 and held various leadership roles in global health, including during crises like Ebola outbreaks and malaria control. His contributions were widely respected and impactful.</div>
+        </div>
+        
+        
+        
+      </div>
+	  
+   
+      
+    </div>
+
+    <div class="column2">
+		<div class="control-panel">
+		  <h3 class="control-title">Feed management</h3>
+		  
+		  <label for="template" style="font-size: 1.3em; display: block; margin-bottom: 0.625em;">Select a template:</label>
+		  <select name="template" id="template">
+			<option value="usa_gov.html">deep-dive\usa_gov.yaml</option>
+			<option value="who_health_alerts.html">deep-dive\who_health_alerts.yaml</option>
+		  </select>
+		  
+		  <button id="runButton" class="button-run">Start data collection</button>
+		  
+		  <div class="stats">
+			<div><strong>Event total:</strong> 154</div>
+			<div><strong>Last update:</strong> 2025-07-30 14:15</div>
+		  </div>
+		</div>
+    </div>
+  </div>
+
+	<script>
+	document.getElementById('runButton').addEventListener('click', function() {
+	  const selectedTemplate = document.getElementById('template').value;
+	  window.location.href = selectedTemplate;
+	});
+	</script>
+
+  <script>
+    function toggleCard(card) {
+      card.classList.toggle('expanded');
+    }
+
+    // Обработчик масштабирования
+    let touchStartDistance = 0;
+    let currentScale = 1;
+    const maxScale = 3;
+    const minScale = 0.8;
+    const html = document.documentElement;
+
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        touchStartDistance = getDistance(e.touches[0], e.touches[1]);
+      }
+    }, false);
+
+    document.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const touchEndDistance = getDistance(e.touches[0], e.touches[1]);
+        const scale = touchEndDistance / touchStartDistance;
+        
+        currentScale *= scale;
+        currentScale = Math.max(minScale, Math.min(maxScale, currentScale));
+        
+        document.documentElement.style.setProperty('--scale-factor', currentScale);
+        touchStartDistance = touchEndDistance;
+      }
+    }, { passive: false });
+
+    function getDistance(touch1, touch2) {
+      const dx = touch1.clientX - touch2.clientX;
+      const dy = touch1.clientY - touch2.clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+  </script>
+
+<img src="demo_files/mouseover.png" id="link_preview_icon" style="visibility: hidden; left: 1434px; top: 438px;"><div id="lprv_frame" style="visibility: hidden;">
+          <div class="lprv_toolbar">
+            <div id="logo"></div>
+            <div class="lprv_btn_group">
+              <button class="lprv_btn" id="back" title="Back"></button>
+              <button class="lprv_btn" id="forward" title="Forward"></button>
+            </div>
+            <div class="lprv_btn_group">
+              <button class="lprv_btn" id="open_tab" title="Open in new tab"></button>
+            </div>
+            <div class="lprv_btn_group" id="pin">
+              <button class="lprv_btn" id="push-pin" title="Keep preview frame open"></button>
+              <button class="lprv_btn" id="hide" title="Hide preview frame"></button>
+            </div>
+          </div>
+          <div id="lprv_vresize"></div>
+          <iframe id="lprv_content"></iframe>
+        </div></body></html>

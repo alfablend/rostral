@@ -116,6 +116,37 @@
       color: #D9AB35;
       font-weight: 600;
     }
+
+    .demo-link {
+      display: inline-block;
+      margin: 1em 0;
+      padding: 0.8em 1.5em;
+      background-color: #D9AB35;
+      color: white;
+      text-decoration: none;
+      border-radius: 0.375em;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .demo-link:hover {
+      background-color: #c7992e;
+      transform: translateY(-2px);
+    }
+
+    .screenshot-container {
+      margin: 2em auto;
+      max-width: 800px;
+      box-shadow: 0 0.25em 0.75em rgba(0,0,0,0.1);
+      border-radius: 0.625em;
+      overflow: hidden;
+    }
+
+    .screenshot-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
     
     /* New IO Example Section */
     .io-example {
@@ -378,6 +409,12 @@
         Extract meaningful insights from <span class="highlight">PDF files</span> and <span class="highlight">foreign sources</span>
         with AI-powered semantic processing.
       </p>
+
+      <a href="demo/demo.html" class="demo-link">Try Interactive Demo</a>
+
+      <div class="screenshot-container">
+        <img src="screenshot-main.png" alt="Rostral.io Interface Screenshot" class="screenshot-img">
+      </div>
     </div>
 
     <!-- New IO Example Section -->
@@ -385,7 +422,7 @@
       <h3 class="io-title">Document Processing Example</h3>
       <div class="io-columns">
         <div class="io-column">
-            <a href="https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf">Input PDF</a>
+          <div class="io-column-title"><a href="https://www.govinfo.gov/content/pkg/FR-2025-07-28/pdf/2025-14217.pdf">Input PDF</a></div>
           <div class="io-content">Presidential Documents
 35389Federal Register / Vol. 90, No. 142 / Monday, July 28, 2025 / Presidential Documents
 Executive Order 14319 of July 23, 2025
@@ -450,7 +487,7 @@ where reliable information is incomplete or contradictory.
 (b) Ideological Neutrality. LLMs shall be neutral, nonpartisan tools that
 do not manipulate responses in favor of ideological dogmas such as DEI.
 Developers shall not intentionally encode partisan or ideological judgments
-into an LLM’s outputs unless those judgments are prompted by or otherwise
+into an LLM's outputs unless those judgments are prompted by or otherwise
 readily accessible to the end user.
 Sec. 4. Implementation. (a) Within 120 days of the date of this order,
 the Director of the Office of Management and Budget (OMB), in consultation
@@ -461,7 +498,7 @@ order. That guidance shall:
 (i) account for technical limitations in complying with this order;
 (ii) permit vendors to comply with the requirement in the second Unbiased
 AI Principle to be transparent about ideological judgments through disclo-
-sure of the LLM’s system prompt, specifications, evaluations, or other
+sure of the LLM's system prompt, specifications, evaluations, or other
 relevant documentation, and avoid requiring disclosure of specific model
 weights or other sensitive technical data where practicable;
 (iii) avoid over-prescription and afford latitude for vendors to comply
@@ -478,7 +515,7 @@ ble law:
 the date of the OMB guidance issued under subsection (a) of this section
 terms requiring that the procured LLM comply with the Unbiased AI
 Principles and providing that decommissioning costs shall be charged
-to the vendor in the event of termination by the agency for the vendor’s
+to the vendor in the event of termination by the agency for the vendor's
 noncompliance with the contract following a reasonable period to cure;
 (ii) to the extent practicable and consistent with contract terms, revise
 existing contracts for LLMs to include the terms specified in subsection

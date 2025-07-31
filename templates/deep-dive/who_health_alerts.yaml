@@ -27,7 +27,7 @@ extract:
   events:
     selector: "item"
     type: "list"
-    limit: 2
+    limit: 3
     fields:
       title:
         attr: "title"
