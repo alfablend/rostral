@@ -1,5 +1,7 @@
 # Rostral.io
 
+[![Web Demo](https://img.shields.io/badge/🌐_Web_Demo-Try_Now-%23D9AB35?style=for-the-badge&logo=google-chrome&logoColor=white)](https://rostral.io/demo/demo.html)
+
 <p align="center">
   <img src="assets/screenshot-main.png" width="800" alt="Rostral Web Interface Screenshot">
   <br>
@@ -21,14 +23,6 @@ _From sites with PDF documents to global sources — one intelligent feed_
 - **Document Monitoring** - Track changes in PDFs
 
 ---
-
-## 🖥️ Interface Preview
-
-```bash
-python app.py  # Launch web interface
-```
-
-[![Web Demo](https://img.shields.io/badge/🌐_Web_Demo-Try_Now-%23D9AB35?style=for-the-badge&logo=google-chrome&logoColor=white)](https://rostral.io/preview.html)
 
 **I/O example**
 
